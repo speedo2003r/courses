@@ -1,0 +1,122 @@
+/* ============================================================
+   CSS DESIGN TOKENS — EdTech Platform
+   Single Source of Truth for all design decisions
+   ============================================================ */
+
+/* ---- Google Fonts loaded via HTML <link> in each page ---- */
+
+:root {
+  /* ---- FONT STACKS ---- */
+  --font-display: 'Outfit', 'Inter', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Arabic overrides applied via [lang="ar"] selector in main.css */
+  --font-display-ar: 'Alexandria', 'Cairo', sans-serif;
+  --font-body-ar: 'Cairo', 'Tajawal', sans-serif;
+
+  /* ---- TYPOGRAPHIC SCALE ---- */
+  --font-size-display: clamp(2.25rem, 5vw, 3.5rem);   /* 36-56px */
+  --font-size-h1:      clamp(1.75rem, 3.5vw, 2.5rem); /* 28-40px */
+  --font-size-h2:      clamp(1.5rem, 2.5vw, 2rem);    /* 24-32px */
+  --font-size-h3:      clamp(1.25rem, 2vw, 1.5rem);   /* 20-24px */
+  --font-size-h4:      clamp(1.125rem, 1.5vw, 1.25rem);
+  --font-size-body-lg: clamp(1rem, 1.25vw, 1.125rem);
+  --font-size-body:    1rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-caption: 0.75rem;
+
+  /* ---- COLOR SYSTEM — HSL Light Theme ---- */
+  --color-primary:       hsl(222, 85%, 56%);
+  --color-primary-hover: hsl(222, 85%, 48%);
+  --color-secondary:     hsl(262, 80%, 50%);
+  --color-accent:        hsl(38, 95%, 54%);
+  --color-success:       hsl(145, 65%, 42%);
+  --color-danger:        hsl(355, 78%, 56%);
+
+  /* Backgrounds */
+  --color-bg-main:    hsl(210, 20%, 98%);
+  --color-bg-card:    hsl(0, 0%, 100%);
+  --color-bg-subtle:  hsl(210, 15%, 94%);
+  --color-bg-dark:    hsl(222, 47%, 11%);
+  --color-bg-darker:  hsl(222, 47%, 8%);
+
+  /* Text */
+  --color-text-title:   hsl(222, 47%, 11%);
+  --color-text-body:    hsl(215, 25%, 27%);
+  --color-text-muted:   hsl(215, 16%, 47%);
+  --color-text-inverse: hsl(0, 0%, 100%);
+
+  /* Borders */
+  --color-border-subtle: hsl(214, 15%, 89%);
+  --color-border-hover:  hsl(222, 85%, 56%);
+
+  /* ---- SPACING SCALE — 8px base ---- */
+  --space-xxs: 0.25rem;  /*  4px */
+  --space-xs:  0.5rem;   /*  8px */
+  --space-sm:  0.75rem;  /* 12px */
+  --space-md:  1rem;     /* 16px */
+  --space-lg:  1.5rem;   /* 24px */
+  --space-xl:  2rem;     /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4rem;     /* 64px */
+  --space-4xl: 6rem;     /* 96px */
+
+  /* ---- BORDER RADIUS ---- */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-full: 9999px;
+
+  /* ---- ELEVATION / SHADOW SCALE ---- */
+  --elevation-flat:   none;
+  --elevation-subtle: 0 2px 8px rgba(0,0,0,0.04);
+  --elevation-card:   0 4px 16px rgba(0,0,0,0.08);
+  --elevation-hover:  0 12px 28px rgba(0,0,0,0.14);
+  --elevation-modal:  0 24px 48px rgba(0,0,0,0.22);
+
+  /* ---- GLASSMORPHISM ---- */
+  --glass-blur-sm: blur(8px);
+  --glass-blur-md: blur(12px);
+  --glass-blur-lg: blur(24px);
+  --glass-bg-light: rgba(255,255,255,0.75);
+  --glass-border-light: rgba(255,255,255,0.3);
+
+  /* ---- MOTION / EASING ---- */
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decel: cubic-bezier(0, 0, 0.2, 1);
+  --motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow: 350ms cubic-bezier(0, 0, 0.2, 1);
+  --motion-page: 450ms cubic-bezier(0, 0, 0.2, 1);
+
+  /* ---- CONTAINERS ---- */
+  --container-sm:   720px;
+  --container-md:   960px;
+  --container-lg:   1280px;
+  --container-wide: 1440px;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --color-bg-main:    hsl(222, 47%, 8%);
+  --color-bg-card:    hsl(222, 40%, 13%);
+  --color-bg-subtle:  hsl(222, 35%, 18%);
+  --color-bg-dark:    hsl(222, 47%, 5%);
+
+  --color-text-title:  hsl(210, 20%, 98%);
+  --color-text-body:   hsl(215, 20%, 82%);
+  --color-text-muted:  hsl(215, 15%, 65%);
+
+  --color-border-subtle: hsl(222, 25%, 22%);
+
+  --elevation-subtle: 0 2px 8px rgba(0,0,0,0.20);
+  --elevation-card:   0 4px 16px rgba(0,0,0,0.35);
+  --elevation-hover:  0 12px 28px rgba(0,0,0,0.50);
+  --elevation-modal:  0 24px 48px rgba(0,0,0,0.70);
+
+  --glass-bg-light:     rgba(18,24,38,0.75);
+  --glass-border-light: rgba(255,255,255,0.08);
+}

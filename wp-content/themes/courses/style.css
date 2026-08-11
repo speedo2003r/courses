@@ -1,0 +1,26 @@
+/*
+Theme Name: EdTech Platform Theme
+Theme URI: https://example.com/
+Author: Google DeepMind Team
+Author URI: https://example.com/
+Description: Production-quality WordPress theme for EdTech Platform based on Underscores starter foundation with native RTL and bilingual support.
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: edtech
+Tags: education, e-learning, rtl-language-support, custom-post-types, responsive-layout, two-columns, full-width-template
+
+============================================================
+EDTECH PLATFORM THEME — PRODUCTION WORDPRESS STYLESHEET
+============================================================
+*/
+
+/* Reset WP Admin Bar Offset for Sticky Elements */
+body.admin-bar .navbar {
+  top: 32px;
+}
+@media screen and (max-width: 782px) {
+  body.admin-bar .navbar {
+    top: 46px;
+  }
+}

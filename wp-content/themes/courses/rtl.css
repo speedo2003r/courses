@@ -1,0 +1,25 @@
+/*
+Theme Name: EdTech Platform Theme — RTL Stylesheet
+Text Domain: edtech
+*/
+
+body {
+  font-family: var(--font-body-ar), 'Cairo', 'Alexandria', sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display-ar), 'Cairo', 'Alexandria', sans-serif;
+}
+
+/* Logical properties fallbacks for legacy RTL rendering */
+.input-search-icon {
+  right: 16px;
+  left: auto;
+}
+
+.search-input {
+  padding-right: 48px;
+  padding-left: 16px;
+}
