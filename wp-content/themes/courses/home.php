@@ -1,7 +1,6 @@
 <?php
 /**
- * Template Name: Blog Page
- * The Blog / Resources Hub Archive template
+ * The Blog / Resources Hub Archive template (home.php = posts index).
  *
  * Maps 1-to-1 to blog.html and ar/blog.html
  *
@@ -17,14 +16,16 @@ get_header();
   <div class="container">
     <div class="reveal">
       <h1 style="margin-bottom:var(--space-md);"><?php is_rtl() ? _e('مركز المعرفة والموارد التعليمية', 'edtech') : _e('Knowledge Hub & Educational Resources', 'edtech'); ?></h1>
-      
+
       <!-- Category Filter Chips -->
       <div style="display:flex;gap:var(--space-xs);flex-wrap:wrap;margin-bottom:var(--space-lg);" id="blog-category-filters">
         <button class="chip filter-chip active" data-category="all"><?php is_rtl() ? _e('جميع المواضيع', 'edtech') : _e('All Topics', 'edtech'); ?></button>
-        <button class="chip filter-chip" data-category="web-development"><?php is_rtl() ? _e('تطوير الويب', 'edtech') : _e('Web Development', 'edtech'); ?></button>
-        <button class="chip filter-chip" data-category="design"><?php is_rtl() ? _e('التصميم', 'edtech') : _e('Design', 'edtech'); ?></button>
-        <button class="chip filter-chip" data-category="data-science"><?php is_rtl() ? _e('علم البيانات', 'edtech') : _e('Data Science', 'edtech'); ?></button>
-        <button class="chip filter-chip" data-category="digital-marketing"><?php is_rtl() ? _e('التسويق الرقمي', 'edtech') : _e('Digital Marketing', 'edtech'); ?></button>
+        <?php
+        $blog_cats = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'exclude' => get_option( 'default_category' ) ) );
+        foreach ( $blog_cats as $term ) :
+          ?>
+          <button class="chip filter-chip" data-category="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></button>
+        <?php endforeach; ?>
       </div>
     </div>
 
@@ -35,18 +36,26 @@ get_header();
       $featured   = $featured_posts[0];
       $feat_id     = $featured->ID;
       $feat_link   = get_permalink( $feat_id );
-      $feat_thumb  = get_the_post_thumbnail_url( $feat_id, 'large' ) ?: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=900&auto=format&fit=crop&q=80';
+      $feat_thumb  = edtech_get_post_image( $feat_id, 'large', 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=900&auto=format&fit=crop&q=80' );
       $feat_title  = get_the_title( $feat_id );
       $feat_excerpt= get_the_excerpt( $feat_id ) ?: get_post_field( 'post_content', $feat_id );
+      $feat_cats   = get_the_category( $feat_id );
+      $feat_slugs  = array();
+      if ( ! empty( $feat_cats ) ) {
+        foreach ( $feat_cats as $c ) {
+          $feat_slugs[] = $c->slug;
+        }
+      }
+      $feat_cat_name = ! empty( $feat_cats ) ? $feat_cats[0]->name : '';
     ?>
-    <div class="card course-card reveal" data-category="web-development development" style="display:grid;grid-template-columns:55fr 45fr;gap:0;padding:0;overflow:hidden;margin-bottom:var(--space-xl);">
+    <div class="card course-card reveal" data-category="<?php echo esc_attr( implode( ' ', $feat_slugs ) ); ?>" style="display:grid;grid-template-columns:55fr 45fr;gap:0;padding:0;overflow:hidden;margin-bottom:var(--space-xl);">
       <div style="aspect-ratio:16/9;overflow:hidden;">
         <a href="<?php echo esc_url( $feat_link ); ?>">
           <img src="<?php echo esc_url( $feat_thumb ); ?>" alt="<?php echo esc_attr( $feat_title ); ?>" loading="eager" style="width:100%;height:100%;object-fit:cover;">
         </a>
       </div>
       <div style="padding:var(--space-xl);display:flex;flex-direction:column;justify-content:center;">
-        <span class="badge badge-new" style="align-self:flex-start;margin-bottom:var(--space-sm);"><?php is_rtl() ? _e('مميز · تطوير الويب', 'edtech') : _e('Featured · Development', 'edtech'); ?></span>
+        <span class="badge badge-new" style="align-self:flex-start;margin-bottom:var(--space-sm);"><?php is_rtl() ? _e('مميز', 'edtech') : _e('Featured', 'edtech'); ?><?php echo $feat_cat_name ? ' · ' . esc_html( $feat_cat_name ) : ''; ?></span>
         <h2 style="margin-bottom:var(--space-md);"><a href="<?php echo esc_url( $feat_link ); ?>" style="color:inherit;text-decoration:none;"><?php echo esc_html( $feat_title ); ?></a></h2>
         <p style="color:var(--color-text-muted);margin-bottom:var(--space-md);font-size:14px;"><?php echo esc_html( wp_trim_words( $feat_excerpt, 20 ) ); ?></p>
         <a href="<?php echo esc_url( $feat_link ); ?>" class="btn btn-primary" style="align-self:flex-start;"><?php is_rtl() ? _e('اقرأ المقال ←', 'edtech') : _e('Read Article →', 'edtech'); ?></a>
@@ -69,34 +78,17 @@ get_header();
 
       if ( $blog_query->have_posts() ) :
         while ( $blog_query->have_posts() ) : $blog_query->the_post();
-          $post_id    = get_the_ID();
-          $post_thumb = get_the_post_thumbnail_url( $post_id, 'medium_large' ) ?: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80';
+          $post_thumb = edtech_get_post_image( get_the_ID(), 'medium_large', 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80' );
           $post_cats  = get_the_category();
-          $cat_name   = ! empty( $post_cats ) ? $post_cats[0]->name : ( is_rtl() ? 'تطوير الويب' : 'Web Dev' );
-
-          // Generate data-category tag for client-side filtering
-          $cat_slugs = array();
+          $cat_name   = ! empty( $post_cats ) ? $post_cats[0]->name : ( is_rtl() ? 'عام' : 'General' );
+          $cat_slugs  = array();
           if ( ! empty( $post_cats ) ) {
             foreach ( $post_cats as $c ) {
-              $cat_slugs[] = strtolower( $c->slug );
-              $cat_slugs[] = strtolower( $c->name );
+              $cat_slugs[] = $c->slug;
             }
           }
-          $title_lower = strtolower( get_the_title( $post_id ) );
-          if ( strpos( $title_lower, 'react' ) !== false || strpos( $title_lower, 'web' ) !== false || strpos( $title_lower, 'ويب' ) !== false ) {
-            $cat_slugs[] = 'web-development';
-          }
-          if ( strpos( $title_lower, 'figma' ) !== false || strpos( $title_lower, 'design' ) !== false || strpos( $title_lower, 'تصميم' ) !== false ) {
-            $cat_slugs[] = 'design';
-          }
-          if ( strpos( $title_lower, 'pandas' ) !== false || strpos( $title_lower, 'polars' ) !== false || strpos( $title_lower, 'data' ) !== false || strpos( $title_lower, 'بيانات' ) !== false ) {
-            $cat_slugs[] = 'data-science';
-          }
-          if ( strpos( $title_lower, 'growth' ) !== false || strpos( $title_lower, 'marketing' ) !== false || strpos( $title_lower, 'تسويق' ) !== false ) {
-            $cat_slugs[] = 'digital-marketing';
-          }
           if ( empty( $cat_slugs ) ) {
-            $cat_slugs[] = 'web-development';
+            $cat_slugs[] = 'uncategorized';
           }
           $data_cat_attr = esc_attr( implode( ' ', array_unique( $cat_slugs ) ) );
       ?>

@@ -9,6 +9,25 @@
  */
 
 get_header();
+
+// Resolve dynamic stats (counts come from the DB; marketing claims from customizer).
+$course_count     = wp_count_posts( 'course' );
+$instructor_count = wp_count_posts( 'instructor' );
+$stat_courses     = isset( $course_count->publish ) ? (int) $course_count->publish : 0;
+$stat_instructors = isset( $instructor_count->publish ) ? (int) $instructor_count->publish : 0;
+$stat_students    = edtech_get_site_setting( 'stats_students', '45000' );
+$stat_completion  = edtech_get_site_setting( 'stats_completion', '98%' );
+
+// Hero title supports a 3-segment split via "||" so the middle segment keeps the accent color.
+$hero_title_raw = edtech_get_site_setting( 'hero_title', is_rtl() ? 'أتقن المهارات الرقمية||الأكثر طلباً|| وابنِ مشاريع حقيقية' : 'Master High-Impact||Digital Skills|| & Build Real Products' );
+$hero_title_parts = array_map( 'trim', explode( '||', $hero_title_raw ) );
+$hero_eyebrow   = edtech_get_site_setting( 'hero_eyebrow', is_rtl() ? 'تقييم 4.9' : '4.9 Rating' );
+$hero_subtitle  = edtech_get_site_setting( 'hero_subtitle', is_rtl() ? '+45,000 طالب نشط' : '45,000+ Active Students' );
+$hero_desc      = edtech_get_site_setting( 'hero_description', is_rtl() ? 'توقف عن مشاهدة الشروحات السطحية. تعلّم من خبراء الصناعة المعتمدين، وابنِ مشاريع قوية لمحفظتك.' : 'Stop watching passive tutorials. Learn from verified industry practitioners, build portfolio-grade projects, and launch your digital career.' );
+$hero_cta       = edtech_get_site_setting( 'hero_cta_label', is_rtl() ? 'اشترك الآن — 49$' : 'Enroll Now — $49' );
+$hero_cta2      = edtech_get_site_setting( 'hero_cta2_label', is_rtl() ? 'شاهد الماستر كلاس المجاني' : 'Watch Free Masterclass' );
+
+$catalog_link   = get_post_type_archive_link( 'course' );
 ?>
 
 <main id="main-content">
@@ -24,26 +43,22 @@ get_header();
       <!-- Left: Copy + Search -->
       <div class="reveal">
         <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
-          <span class="badge badge-bestseller">★ <?php is_rtl() ? _e('تقييم 4.9', 'edtech') : _e('4.9 Rating', 'edtech'); ?></span>
-          <span style="font-size:13px;color:var(--color-text-muted);"><?php is_rtl() ? _e('+45,000 طالب نشط', 'edtech') : _e('45,000+ Active Students', 'edtech'); ?></span>
+          <span class="badge badge-bestseller">★ <?php echo esc_html( $hero_eyebrow ); ?></span>
+          <span style="font-size:13px;color:var(--color-text-muted);"><?php echo esc_html( $hero_subtitle ); ?></span>
         </div>
         <h1 style="font-size:var(--font-size-display);margin-bottom:var(--space-lg);line-height:1.1;letter-spacing:-0.025em;">
-          <?php if ( is_rtl() ) : ?>
-            أتقن المهارات الرقمية<br>
-            <span style="color:var(--color-primary);">الأكثر طلباً</span><br>
-            وابنِ مشاريع حقيقية
-          <?php else : ?>
-            Master High-Impact<br>
-            <span style="color:var(--color-primary);">Digital Skills</span> &amp;<br>
-            Build Real Products
-          <?php endif; ?>
+          <?php
+          if ( count( $hero_title_parts ) >= 3 ) {
+            echo esc_html( $hero_title_parts[0] ) . '<br>';
+            echo '<span style="color:var(--color-primary);">' . esc_html( $hero_title_parts[1] ) . '</span><br>';
+            echo esc_html( $hero_title_parts[2] );
+          } else {
+            echo esc_html( $hero_title_raw );
+          }
+          ?>
         </h1>
         <p style="font-size:var(--font-size-body-lg);color:var(--color-text-muted);max-width:520px;margin-bottom:var(--space-xl);line-height:1.65;">
-          <?php if ( is_rtl() ) : ?>
-            توقف عن مشاهدة الشروحات السطحية. تعلّم من خبراء الصناعة المعتمدين، وابنِ مشاريع قوية لمحفظتك، وابدأ مسيرتك المهنية بثقة.
-          <?php else : ?>
-            Stop watching passive tutorials. Learn from verified industry practitioners, build portfolio-grade projects, and launch your digital career.
-          <?php endif; ?>
+          <?php echo esc_html( $hero_desc ); ?>
         </p>
 
         <!-- Search Engine -->
@@ -59,17 +74,22 @@ get_header();
           >
         </div>
 
-        <!-- Category Chips -->
+        <!-- Category Chips (dynamic from course_category taxonomy) -->
         <div style="display:flex;gap:var(--space-xs);flex-wrap:wrap;margin-bottom:var(--space-xl);">
-          <a href="<?php echo esc_url( home_url('/catalog?cat=dev') ); ?>" class="chip"><?php is_rtl() ? _e('تطوير الويب', 'edtech') : _e('Web Development', 'edtech'); ?></a>
-          <a href="<?php echo esc_url( home_url('/catalog?cat=des') ); ?>" class="chip"><?php is_rtl() ? _e('تصميم UI/UX', 'edtech') : _e('UI/UX Design', 'edtech'); ?></a>
-          <a href="<?php echo esc_url( home_url('/catalog?cat=data') ); ?>" class="chip"><?php is_rtl() ? _e('علم البيانات', 'edtech') : _e('Data Science', 'edtech'); ?></a>
-          <a href="<?php echo esc_url( home_url('/catalog?cat=mkt') ); ?>" class="chip"><?php is_rtl() ? _e('التسويق الرقمي', 'edtech') : _e('Digital Marketing', 'edtech'); ?></a>
+          <?php
+          $chip_terms = get_terms( array( 'taxonomy' => 'course_category', 'hide_empty' => false, 'number' => 4 ) );
+          if ( ! is_wp_error( $chip_terms ) && $chip_terms ) :
+            foreach ( $chip_terms as $term ) : ?>
+              <a href="<?php echo esc_url( get_term_link( $term ) ); ?>" class="chip"><?php echo esc_html( $term->name ); ?></a>
+            <?php endforeach;
+          else : ?>
+            <a href="<?php echo esc_url( $catalog_link ); ?>" class="chip"><?php is_rtl() ? _e('تصفح الدورات', 'edtech') : _e('Browse Courses', 'edtech'); ?></a>
+          <?php endif; ?>
         </div>
 
         <div style="display:flex;gap:var(--space-md);align-items:center;flex-wrap:wrap;">
-          <a href="<?php echo esc_url( home_url('/checkout') ); ?>" class="btn btn-primary btn-lg"><?php is_rtl() ? _e('اشترك الآن — 49$', 'edtech') : _e('Enroll Now — $49', 'edtech'); ?></a>
-          <a href="<?php echo esc_url( home_url('/free-masterclass') ); ?>" class="btn btn-secondary btn-lg"><?php is_rtl() ? _e('شاهد الماستر كلاس المجاني', 'edtech') : _e('Watch Free Masterclass', 'edtech'); ?></a>
+          <a href="<?php echo esc_url( edtech_page_url( 'checkout' ) ); ?>" class="btn btn-primary btn-lg"><?php echo esc_html( $hero_cta ); ?></a>
+          <a href="<?php echo esc_url( edtech_page_url( 'free-masterclass' ) ); ?>" class="btn btn-secondary btn-lg"><?php echo esc_html( $hero_cta2 ); ?></a>
         </div>
 
         <!-- Trust signals -->
@@ -110,9 +130,11 @@ get_header();
           </div>
           <div style="padding:var(--space-md);background:var(--color-bg-subtle);display:flex;justify-content:space-between;align-items:center;">
             <div>
-              <p style="font-size:13px;color:var(--color-text-muted);margin:0;"><?php is_rtl() ? _e('من دورة:', 'edtech') : _e('From the course:', 'edtech'); ?> <a href="<?php echo esc_url( home_url('/course-detail') ); ?>" style="color:var(--color-primary);font-weight:600;"><?php is_rtl() ? _e('تطوير الويب المتكامل', 'edtech') : _e('Full-Stack Web Development', 'edtech'); ?></a></p>
+              <p style="font-size:13px;color:var(--color-text-muted);margin:0;"><?php is_rtl() ? _e('من كتالوج الدورات', 'edtech') : _e('From the catalog:', 'edtech'); ?>
+                <a href="<?php echo esc_url( $catalog_link ); ?>" style="color:var(--color-primary);font-weight:600;"><?php is_rtl() ? _e('استكشف الدورات', 'edtech') : _e('Explore Courses', 'edtech'); ?></a>
+              </p>
             </div>
-            <a href="<?php echo esc_url( home_url('/free-masterclass') ); ?>" class="btn btn-primary" style="height:36px;font-size:13px;"><?php is_rtl() ? _e('جرّب مجاناً ←', 'edtech') : _e('Try Free Sample →', 'edtech'); ?></a>
+            <a href="<?php echo esc_url( edtech_page_url( 'free-masterclass' ) ); ?>" class="btn btn-primary" style="height:36px;font-size:13px;"><?php is_rtl() ? _e('جرّب مجاناً ←', 'edtech') : _e('Try Free Sample →', 'edtech'); ?></a>
           </div>
         </div>
       </div>
@@ -154,20 +176,34 @@ get_header();
         <h2><?php is_rtl() ? _e('تعلّم من خبراء الصناعة المعتمدين', 'edtech') : _e('Learn From Verified Industry Experts', 'edtech'); ?></h2>
         <p style="color:var(--color-text-muted);margin-top:var(--space-xs);"><?php is_rtl() ? _e('اضغط على الميكروفون للاستماع لمقدمة صوتية قصيرة من المدرب.', 'edtech') : _e('Tap the microphone to hear a 30-second voice greeting from each instructor.', 'edtech'); ?></p>
       </div>
-      <a href="<?php echo esc_url( home_url('/instructors') ); ?>" class="btn btn-secondary reveal"><?php is_rtl() ? _e('عرض جميع المدربين', 'edtech') : _e('View All Instructors', 'edtech'); ?></a>
+      <a href="<?php echo esc_url( get_post_type_archive_link( 'instructor' ) ); ?>" class="btn btn-secondary reveal"><?php is_rtl() ? _e('عرض جميع المدربين', 'edtech') : _e('View All Instructors', 'edtech'); ?></a>
     </div>
 
     <div class="grid grid-4">
       <?php
-      $instructors = array(
-        array( 'name' => is_rtl() ? 'م. طارق منصور' : 'Eng. Tariq Mansour', 'title' => is_rtl() ? 'مهندس Full-Stack أول' : 'Senior Full-Stack Architect', 'img' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/tariq-intro.mp3', 'stats' => '★ 4.9 · 1,240' ),
-        array( 'name' => is_rtl() ? 'سارة الراشد' : 'Sarah Al-Rashid', 'title' => is_rtl() ? 'مصممة UI/UX رائدة' : 'Lead UI/UX Designer', 'img' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/sarah-intro.mp3', 'stats' => '★ 4.8 · 890' ),
-        array( 'name' => is_rtl() ? 'د. عمر فاروق' : 'Dr. Omar Farooq', 'title' => is_rtl() ? 'خبير علم البيانات' : 'Data Science Specialist', 'img' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/omar-intro.mp3', 'stats' => '★ 4.9 · 2,100' ),
-        array( 'name' => is_rtl() ? 'ليلى حسن' : 'Layla Hassan', 'title' => is_rtl() ? 'استراتيجية النمو الرقمي' : 'Digital Growth Strategist', 'img' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/layla-intro.mp3', 'stats' => '★ 4.7 · 680' ),
-      );
-      foreach ( $instructors as $inst ) {
-        get_template_part( 'template-parts/content-instructor-card', null, $inst );
-      }
+      $instructors_query = new WP_Query( array(
+        'post_type'      => 'instructor',
+        'posts_per_page' => 4,
+        'post_status'    => 'publish',
+      ) );
+
+      if ( $instructors_query->have_posts() ) :
+        while ( $instructors_query->have_posts() ) : $instructors_query->the_post();
+          get_template_part( 'template-parts/content-instructor-card' );
+        endwhile;
+        wp_reset_postdata();
+      else :
+        // Fallback static cards so the section still renders before any instructors exist.
+        $fallback = array(
+          array( 'name' => is_rtl() ? 'م. طارق منصور' : 'Eng. Tariq Mansour', 'title' => is_rtl() ? 'مهندس Full-Stack أول' : 'Senior Full-Stack Architect', 'img' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80', 'stats' => is_rtl() ? '★ 4.9 · 1,240 طالب' : '★ 4.9 · 1,240 Students' ),
+          array( 'name' => is_rtl() ? 'سارة الراشد' : 'Sarah Al-Rashid', 'title' => is_rtl() ? 'مصممة UI/UX رائدة' : 'Lead UI/UX Designer', 'img' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80', 'stats' => is_rtl() ? '★ 4.8 · 890 طالب' : '★ 4.8 · 890 Students' ),
+          array( 'name' => is_rtl() ? 'د. عمر فاروق' : 'Dr. Omar Farooq', 'title' => is_rtl() ? 'خبير علم البيانات' : 'Data Science Specialist', 'img' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80', 'stats' => is_rtl() ? '★ 4.9 · 2,100 طالب' : '★ 4.9 · 2,100 Students' ),
+          array( 'name' => is_rtl() ? 'ليلى حسن' : 'Layla Hassan', 'title' => is_rtl() ? 'استراتيجية النمو الرقمي' : 'Digital Growth Strategist', 'img' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80', 'stats' => is_rtl() ? '★ 4.7 · 680 طالب' : '★ 4.7 · 680 Students' ),
+        );
+        foreach ( $fallback as $inst ) {
+          get_template_part( 'template-parts/content-instructor-card', null, $inst );
+        }
+      endif;
       ?>
     </div>
   </div>
@@ -203,10 +239,10 @@ get_header();
 
         <div class="reveal">
           <div class="grid grid-2" style="gap:var(--space-md);">
-            <div class="stat-card text-center"><div class="stat-value" data-target="45000">0</div><div class="stat-label"><?php is_rtl() ? _e('طالب نشط', 'edtech') : _e('Active Students', 'edtech'); ?></div></div>
-            <div class="stat-card text-center"><div class="stat-value" data-target="16">0</div><div class="stat-label"><?php is_rtl() ? _e('دورة متميزة', 'edtech') : _e('Premium Courses', 'edtech'); ?></div></div>
-            <div class="stat-card text-center"><div class="stat-value" data-target="4">0</div><div class="stat-label"><?php is_rtl() ? _e('مدرب خبير', 'edtech') : _e('Expert Instructors', 'edtech'); ?></div></div>
-            <div class="stat-card text-center"><div class="stat-value">98%</div><div class="stat-label"><?php is_rtl() ? _e('معدل الإكمال', 'edtech') : _e('Completion Rate', 'edtech'); ?></div></div>
+            <div class="stat-card text-center"><div class="stat-value" data-target="<?php echo esc_attr( (int) $stat_students ); ?>">0</div><div class="stat-label"><?php is_rtl() ? _e('طالب نشط', 'edtech') : _e('Active Students', 'edtech'); ?></div></div>
+            <div class="stat-card text-center"><div class="stat-value" data-target="<?php echo esc_attr( $stat_courses ); ?>">0</div><div class="stat-label"><?php is_rtl() ? _e('دورة متميزة', 'edtech') : _e('Premium Courses', 'edtech'); ?></div></div>
+            <div class="stat-card text-center"><div class="stat-value" data-target="<?php echo esc_attr( $stat_instructors ); ?>">0</div><div class="stat-label"><?php is_rtl() ? _e('مدرب خبير', 'edtech') : _e('Expert Instructors', 'edtech'); ?></div></div>
+            <div class="stat-card text-center"><div class="stat-value"><?php echo esc_html( $stat_completion ); ?></div><div class="stat-label"><?php is_rtl() ? _e('معدل الإكمال', 'edtech') : _e('Completion Rate', 'edtech'); ?></div></div>
           </div>
         </div>
       </div>
@@ -224,18 +260,50 @@ get_header();
 
     <div style="max-width:720px;margin-inline:auto;" class="reveal">
       <div class="skill-tree">
-        <div class="skill-node">
-          <div class="skill-node-card" style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <span class="badge badge-new" style="margin-bottom:4px;"><?php is_rtl() ? _e('المرحلة 1', 'edtech') : _e('Phase 1', 'edtech'); ?></span>
-              <h4 style="margin:0;"><?php is_rtl() ? _e('أساسيات الواجهة الأمامية (HTML, CSS, React)', 'edtech') : _e('Frontend Foundations (HTML, CSS, React)', 'edtech'); ?></h4>
-              <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0;"><?php is_rtl() ? _e('4 أسابيع · 3 دورات', 'edtech') : _e('4 Weeks · 3 Courses', 'edtech'); ?></p>
+        <?php
+        $paths_query = new WP_Query( array(
+          'post_type'      => 'learning_path',
+          'posts_per_page' => 3,
+          'post_status'    => 'publish',
+        ) );
+        if ( $paths_query->have_posts() ) :
+          $phase = 1;
+          while ( $paths_query->have_posts() ) : $paths_query->the_post();
+            $weeks   = get_post_meta( get_the_ID(), '_path_weeks', true );
+            $pcourses= get_post_meta( get_the_ID(), '_path_courses', true );
+            $badge   = get_post_meta( get_the_ID(), '_path_badge', true );
+            $badge_class = $badge ? 'badge-' . strtolower( $badge ) : 'badge-new';
+            ?>
+            <div class="skill-node">
+              <div class="skill-node-card" style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <span class="badge <?php echo esc_attr( $badge_class ); ?>" style="margin-bottom:4px;"><?php is_rtl() ? printf( 'المرحلة %d', $phase ) : printf( 'Phase %d', $phase ); ?></span>
+                  <h4 style="margin:0;"><?php the_title(); ?></h4>
+                  <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0;"><?php echo esc_html( sprintf( '%s %s · %s %s', $weeks, ( is_rtl() ? 'أسابيع' : 'Weeks' ), $pcourses, ( is_rtl() ? 'دورات' : 'Courses' ) ) ); ?></p>
+                </div>
+                <a href="<?php echo esc_url( get_permalink() ); ?>" style="color:var(--color-text-muted);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+              </div>
+            </div>
+            <?php
+            $phase++;
+          endwhile;
+          wp_reset_postdata();
+        else :
+          // Fallback single node (structural) before any learning paths exist.
+          ?>
+          <div class="skill-node">
+            <div class="skill-node-card" style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <span class="badge badge-new" style="margin-bottom:4px;"><?php is_rtl() ? _e('المرحلة 1', 'edtech') : _e('Phase 1', 'edtech'); ?></span>
+                <h4 style="margin:0;"><?php is_rtl() ? _e('أساسيات الواجهة الأمامية (HTML, CSS, React)', 'edtech') : _e('Frontend Foundations (HTML, CSS, React)', 'edtech'); ?></h4>
+                <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0;"><?php is_rtl() ? _e('4 أسابيع · 3 دورات', 'edtech') : _e('4 Weeks · 3 Courses', 'edtech'); ?></p>
+              </div>
             </div>
           </div>
-        </div>
+        <?php endif; ?>
       </div>
       <div style="text-align:center;margin-top:var(--space-xl);">
-        <a href="<?php echo esc_url( home_url('/learning-paths') ); ?>" class="btn btn-primary btn-lg"><?php is_rtl() ? _e('استكشف جميع مسارات التعلم', 'edtech') : _e('Explore All Learning Paths', 'edtech'); ?></a>
+        <a href="<?php echo esc_url( edtech_page_url( 'learning-paths' ) ); ?>" class="btn btn-primary btn-lg"><?php is_rtl() ? _e('استكشف جميع مسارات التعلم', 'edtech') : _e('Explore All Learning Paths', 'edtech'); ?></a>
       </div>
     </div>
   </div>
@@ -245,13 +313,13 @@ get_header();
 <section class="section-padding" style="background:linear-gradient(135deg,hsl(222,85%,56%) 0%,hsl(262,80%,50%) 100%);">
   <div class="container" style="text-align:center;">
     <div class="reveal">
-      <h2 style="color:white;font-size:var(--font-size-h1);margin-bottom:var(--space-md);"><?php is_rtl() ? _e('هل أنت جاهز لبناء مستقبلك؟', 'edtech') : _e('Ready to Build Your Future?', 'edtech'); ?></h2>
+      <h2 style="color:white;font-size:var(--font-size-h1);margin-bottom:var(--space-md);"><?php echo esc_html( edtech_get_site_setting( 'enroll_banner_title', is_rtl() ? 'هل أنت جاهز لبناء مستقبلك؟' : 'Ready to Build Your Future?' ) ); ?></h2>
       <p style="color:rgba(255,255,255,0.85);font-size:var(--font-size-body-lg);margin-bottom:var(--space-xl);max-width:560px;margin-inline:auto;">
-        <?php is_rtl() ? _e('انضم إلى 45,000+ طالب يتعلمون بالفعل. ابدأ بالماستر كلاس المجاني — لا حاجة لبطاقة ائتمان.', 'edtech') : _e('Join 45,000+ students already learning. Start with a free masterclass — no credit card required.', 'edtech'); ?>
+        <?php echo esc_html( edtech_get_site_setting( 'enroll_banner_text', is_rtl() ? 'انضم إلى 45,000+ طالب يتعلمون بالفعل. ابدأ بالماستر كلاس المجاني — لا حاجة لبطاقة ائتمان.' : 'Join 45,000+ students already learning. Start with a free masterclass — no credit card required.' ) ); ?>
       </p>
       <div style="display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap;">
-        <a href="<?php echo esc_url( home_url('/free-masterclass') ); ?>" class="btn btn-lg" style="background:white;color:var(--color-primary);"><?php is_rtl() ? _e('شاهد الماستر كلاس المجاني', 'edtech') : _e('Watch Free Masterclass', 'edtech'); ?></a>
-        <a href="<?php echo esc_url( home_url('/catalog') ); ?>" class="btn btn-lg btn-outline" style="border-color:rgba(255,255,255,0.6);color:white;"><?php is_rtl() ? _e('تصفح جميع الدورات', 'edtech') : _e('Browse All Courses', 'edtech'); ?></a>
+        <a href="<?php echo esc_url( edtech_page_url( 'free-masterclass' ) ); ?>" class="btn btn-lg" style="background:white;color:var(--color-primary);"><?php echo esc_html( $hero_cta2 ); ?></a>
+        <a href="<?php echo esc_url( $catalog_link ); ?>" class="btn btn-lg btn-outline" style="border-color:rgba(255,255,255,0.6);color:white;"><?php is_rtl() ? _e('تصفح جميع الدورات', 'edtech') : _e('Browse All Courses', 'edtech'); ?></a>
       </div>
     </div>
   </div>

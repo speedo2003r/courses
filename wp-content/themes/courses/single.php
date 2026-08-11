@@ -2,6 +2,9 @@
 /**
  * The template for displaying single Blog posts (Blog Details)
  *
+ * Falls through to dedicated single-*.php templates for CPTs via the template
+ * hierarchy; this template only renders standard `post` singles.
+ *
  * @package EdTech
  */
 
@@ -14,12 +17,17 @@ $author_avatar = get_avatar_url( $author_id, array( 'size' => 96 ) );
 $post_date  = get_the_date();
 $categories = get_the_category();
 $category_name = ! empty( $categories ) ? $categories[0]->name : ( is_rtl() ? 'تطوير الويب' : 'Development' );
+$blog_link  = get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog' );
+$catalog_link = get_post_type_archive_link( 'course' );
+
+// Read time computed from actual content.
+$read_minutes = max( 1, (int) ceil( str_word_count( wp_strip_all_tags( $post->post_content ) ) / 200 ) );
 
 // Thumbnail or fallback
-$featured_img = get_the_post_thumbnail_url( $current_id, 'full' );
-if ( ! $featured_img ) {
-	$featured_img = 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&auto=format&fit=crop&q=80';
-}
+$featured_img = edtech_get_post_image( $current_id, 'full', 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&auto=format&fit=crop&q=80' );
+
+// Tags
+$tags = get_the_tags();
 ?>
 
 <main>
@@ -32,7 +40,7 @@ if ( ! $featured_img ) {
     <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:var(--space-md);display:flex;align-items:center;gap:var(--space-xs);flex-wrap:wrap;">
       <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e( 'الرئيسية', 'edtech' ) : _e( 'Home', 'edtech' ); ?></a>
       <span>&rsaquo;</span>
-      <a href="<?php echo esc_url( home_url( '/blog/' ) ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e( 'المدونة والموارد', 'edtech' ) : _e( 'Blog & Resources', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( $blog_link ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e( 'المدونة والموارد', 'edtech' ) : _e( 'Blog & Resources', 'edtech' ); ?></a>
       <span>&rsaquo;</span>
       <span style="color:var(--color-accent);"><?php echo esc_html( $category_name ); ?></span>
     </div>
@@ -52,7 +60,7 @@ if ( ! $featured_img ) {
       <span>•</span>
       <div>📅 <?php echo esc_html( $post_date ); ?></div>
       <span>•</span>
-      <div>⏱️ <?php is_rtl() ? _e( 'قراءة 6 دقائق', 'edtech' ) : _e( '6 min read', 'edtech' ); ?></div>
+      <div>⏱️ <?php /* translators: %d: minutes */ printf( esc_html( is_rtl() ? 'قراءة %d دقيقة' : '%d min read' ), (int) $read_minutes ); ?></div>
     </div>
   </div>
 </section>
@@ -95,8 +103,9 @@ if ( ! $featured_img ) {
           <div style="display:flex;align-items:center;gap:var(--space-xs);flex-wrap:wrap;">
             <span style="font-weight:700;font-size:14px;"><?php is_rtl() ? _e( 'الوسوم:', 'edtech' ) : _e( 'Tags:', 'edtech' ); ?></span>
             <span class="chip"><?php echo esc_html( $category_name ); ?></span>
-            <span class="chip">React 19</span>
-            <span class="chip">Web Dev</span>
+            <?php if ( $tags ) : foreach ( $tags as $tag ) : ?>
+              <a href="<?php echo esc_url( get_tag_link( $tag ) ); ?>" class="chip" style="text-decoration:none;"><?php echo esc_html( $tag->name ); ?></a>
+            <?php endforeach; endif; ?>
           </div>
 
           <div style="display:flex;align-items:center;gap:var(--space-xs);">
@@ -124,7 +133,7 @@ if ( ! $featured_img ) {
           <span class="badge badge-bestseller" style="margin-bottom:var(--space-sm);"><?php is_rtl() ? _e( 'دورة موصى بها', 'edtech' ) : _e( 'Recommended Course', 'edtech' ); ?></span>
           <h3 style="color:white;font-size:18px;margin-bottom:var(--space-sm);"><?php is_rtl() ? _e( 'احترف Full-Stack React 19 & Node.js', 'edtech' ) : _e( 'Master Full-Stack React 19 & Node.js', 'edtech' ); ?></h3>
           <p style="color:rgba(255,255,255,0.8);font-size:13px;margin-bottom:var(--space-md);"><?php is_rtl() ? _e( 'انضم إلى أكثر من 12,000 طالب وطوّر تطبيقات حقيقية مع شهادة معتمدة.', 'edtech' ) : _e( 'Join 12,000+ students building production apps with verified certificate.', 'edtech' ); ?></p>
-          <a href="<?php echo esc_url( home_url( '/catalog' ) ); ?>" class="btn btn-primary" style="width:100%;text-align:center;"><?php is_rtl() ? _e( 'استكشف الدورة الان ←', 'edtech' ) : _e( 'Explore Course Now →', 'edtech' ); ?></a>
+          <a href="<?php echo esc_url( $catalog_link ); ?>" class="btn btn-primary" style="width:100%;text-align:center;"><?php is_rtl() ? _e( 'استكشف الدورة الان ←', 'edtech' ) : _e( 'Explore Course Now →', 'edtech' ); ?></a>
         </div>
 
         <!-- Recent Blog Posts Sidebar List -->
@@ -172,7 +181,7 @@ if ( ! $featured_img ) {
         <h2 style="margin-bottom:4px;"><?php is_rtl() ? _e( 'مقالات قد تهمك', 'edtech' ) : _e( 'Related Articles', 'edtech' ); ?></h2>
         <p style="color:var(--color-text-muted);font-size:14px;margin:0;"><?php is_rtl() ? _e( 'واصل القراءة والتعلم مع مواضيع ذات صلة', 'edtech' ) : _e( 'Continue reading and exploring related topics', 'edtech' ); ?></p>
       </div>
-      <a href="<?php echo esc_url( home_url( '/blog/' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'عرض كل المقالات ←', 'edtech' ) : _e( 'View All Articles →', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( $blog_link ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'عرض كل المقالات ←', 'edtech' ) : _e( 'View All Articles →', 'edtech' ); ?></a>
     </div>
 
     <div class="grid grid-3">

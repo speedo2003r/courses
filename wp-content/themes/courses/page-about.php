@@ -26,23 +26,41 @@ get_header();
   </div>
 </section>
 
-<!-- Philosophy Pillars -->
+<!-- Philosophy Pillars (page content) -->
 <section class="section-padding">
+  <div class="container container-md">
+    <?php while ( have_posts() ) : the_post(); the_content(); endwhile; ?>
+  </div>
+</section>
+
+<!-- Team -->
+<section class="section-padding" style="background:var(--color-bg-subtle);">
   <div class="container">
     <div style="text-align:center;max-width:580px;margin-inline:auto;margin-bottom:var(--space-xl);" class="reveal">
-      <h2><?php is_rtl() ? _e('فلسفتنا التعليمية', 'edtech') : _e('Our Educational Philosophy', 'edtech'); ?></h2>
+      <h2><?php is_rtl() ? _e('فريقنا', 'edtech') : _e('Our Team', 'edtech'); ?></h2>
     </div>
     <div class="grid grid-4 reveal">
-      <div class="card card-hover text-center">
-        <div style="font-size:2rem;margin-bottom:var(--space-md);">🎯</div>
-        <h3 style="font-size:var(--font-size-h4);margin-bottom:var(--space-xs);"><?php is_rtl() ? _e('التركيز على النتيجة', 'edtech') : _e('Outcome-First', 'edtech'); ?></h3>
-        <p style="font-size:14px;color:var(--color-text-muted);"><?php is_rtl() ? _e('صممت كل دورة بالرجوع من الوظيفة المستهدفة.', 'edtech') : _e('Every course is built backwards from actual job outcomes.', 'edtech'); ?></p>
-      </div>
-      <div class="card card-hover text-center">
-        <div style="font-size:2rem;margin-bottom:var(--space-md);">🤝</div>
-        <h3 style="font-size:var(--font-size-h4);margin-bottom:var(--space-xs);"><?php is_rtl() ? _e('إرشاد بشري حقيقي', 'edtech') : _e('Human Mentorship', 'edtech'); ?></h3>
-        <p style="font-size:14px;color:var(--color-text-muted);"><?php is_rtl() ? _e('مدربون حقيقيون بخبرات موثّقة.', 'edtech') : _e('Real practitioners with verified track records.', 'edtech'); ?></p>
-      </div>
+      <?php
+      $team = new WP_Query( array( 'post_type' => 'team', 'posts_per_page' => -1, 'post_status' => 'publish' ) );
+      if ( $team->have_posts() ) :
+        while ( $team->have_posts() ) : $team->the_post();
+          $role = get_post_meta( get_the_ID(), '_team_role', true );
+          $img  = edtech_get_post_image( get_the_ID(), 'medium', 'https://placehold.co/300x300/1f2937/e5e7eb?text=Team' );
+          $social = get_post_meta( get_the_ID(), '_team_social', true );
+          ?>
+          <div class="card text-center">
+            <img src="<?php echo esc_url( $img ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-inline:auto;margin-bottom:var(--space-sm);" loading="lazy">
+            <h3 style="font-size:var(--font-size-h4);margin-bottom:var(--space-xs);"><?php echo esc_html( get_the_title() ); ?></h3>
+            <p style="font-size:14px;color:var(--color-text-muted);"><?php echo esc_html( $role ); ?></p>
+            <?php if ( $social ) : ?>
+              <a href="<?php echo esc_url( $social ); ?>" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:var(--color-primary);"><?php is_rtl() ? _e('تابع ←', 'edtech') : _e('Follow →', 'edtech'); ?></a>
+            <?php endif; ?>
+          </div>
+        <?php endwhile;
+        wp_reset_postdata();
+      else : ?>
+        <p style="color:var(--color-text-muted);text-align:center;grid-column:1/-1;"><?php is_rtl() ? _e('لا يوجد أعضاء فريق بعد.', 'edtech') : _e('No team members yet.', 'edtech'); ?></p>
+      <?php endif; ?>
     </div>
   </div>
 </section>

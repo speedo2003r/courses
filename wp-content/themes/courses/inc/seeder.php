@@ -20,8 +20,12 @@ class EdTech_Seeder {
 		self::seed_categories_and_levels();
 		$instructor_ids = self::seed_instructors( $instructors_count );
 		self::seed_courses( $courses_count, $instructor_ids );
+		self::seed_learning_paths();
 		self::seed_blog_posts( $posts_count );
 		self::seed_pages( $pages_count );
+		self::seed_faq();
+		self::seed_testimonials();
+		self::seed_team();
 		flush_rewrite_rules();
 	}
 
@@ -61,17 +65,14 @@ class EdTech_Seeder {
 			array(
 				'title'    => 'Home / الصفحة الرئيسية',
 				'slug'     => 'home',
-				'template' => 'front-page.php',
+				'template' => '', // front-page.php is auto-used for the front page.
+				'role'     => 'front',
 			),
 			array(
 				'title'    => 'Blog / المدونة',
 				'slug'     => 'blog',
-				'template' => 'home.php',
-			),
-			array(
-				'title'    => 'Catalog / كتالوج الدورات',
-				'slug'     => 'catalog',
-				'template' => 'archive-course.php',
+				'template' => '', // home.php is auto-used for the posts page.
+				'role'     => 'posts',
 			),
 			array(
 				'title'    => 'Learning Paths / مسارات التعلم',
@@ -130,10 +131,12 @@ class EdTech_Seeder {
 			),
 		);
 
-		$limit = min( $count, count( $pages ) );
+		$limit    = min( $count, count( $pages ) );
+		$front_id = 0;
+		$posts_id = 0;
 
 		for ( $i = 0; $i < $limit; $i++ ) {
-			$item = $pages[$i];
+			$item     = $pages[$i];
 			$existing = get_page_by_path( $item['slug'], OBJECT, 'page' );
 			if ( ! $existing ) {
 				$existing = get_page_by_title( $item['title'], OBJECT, 'page' );
@@ -147,10 +150,28 @@ class EdTech_Seeder {
 					'post_type'    => 'page',
 					'post_content' => 'EdTech Platform System Page',
 				) );
-				if ( ! empty( $item['template'] ) ) {
-					update_post_meta( $page_id, '_wp_page_template', $item['template'] );
-				}
+			} else {
+				$page_id = $existing->ID;
 			}
+
+			if ( ! empty( $item['template'] ) ) {
+				update_post_meta( $page_id, '_wp_page_template', $item['template'] );
+			}
+			if ( isset( $item['role'] ) && 'front' === $item['role'] ) {
+				$front_id = $page_id;
+			}
+			if ( isset( $item['role'] ) && 'posts' === $item['role'] ) {
+				$posts_id = $page_id;
+			}
+		}
+
+		// Wire up the static front page + posts page so /blog/ uses home.php.
+		if ( $front_id ) {
+			update_option( 'show_on_front', 'page' );
+			update_option( 'page_on_front', $front_id );
+		}
+		if ( $posts_id ) {
+			update_option( 'page_for_posts', $posts_id );
 		}
 	}
 
@@ -360,12 +381,165 @@ class EdTech_Seeder {
 	 * Clear all seeded items
 	 */
 	public static function clear_all() {
-		$post_types = array( 'course', 'instructor', 'learning_path', 'page' );
+		$post_types = array( 'course', 'instructor', 'learning_path', 'faq', 'testimonial', 'team', 'post', 'page' );
+		$protect    = array_filter( array(
+			(int) get_option( 'page_on_front' ),
+			(int) get_option( 'page_for_posts' ),
+		) );
+
 		foreach ( $post_types as $pt ) {
-			$posts = get_posts( array( 'post_type' => $pt, 'posts_per_page' => -1 ) );
+			$posts = get_posts( array( 'post_type' => $pt, 'posts_per_page' => -1, 'post_status' => 'any' ) );
 			foreach ( $posts as $p ) {
-				// Don't delete system default pages if any
+				if ( in_array( (int) $p->ID, $protect, true ) ) {
+					continue;
+				}
 				wp_delete_post( $p->ID, true );
+			}
+		}
+
+		// Reset reading settings to defaults.
+		delete_option( 'page_on_front' );
+		delete_option( 'page_for_posts' );
+		update_option( 'show_on_front', 'posts' );
+	}
+
+	/**
+	 * Seed Learning Paths
+	 */
+	public static function seed_learning_paths() {
+		$paths = array(
+			array(
+				'title'   => 'Frontend Foundations (HTML, CSS, React)',
+				'weeks'   => '4',
+				'courses' => '3',
+				'badge'   => 'New',
+			),
+			array(
+				'title'   => 'Backend Architecture (Node.js & APIs)',
+				'weeks'   => '6',
+				'courses' => '4',
+				'badge'   => 'Bestseller',
+			),
+			array(
+				'title'   => 'Databases, DevOps & Deployment',
+				'weeks'   => '4',
+				'courses' => '3',
+				'badge'   => 'Free',
+			),
+		);
+
+		foreach ( $paths as $item ) {
+			$existing = get_page_by_title( $item['title'], OBJECT, 'learning_path' );
+			if ( ! $existing ) {
+				$post_id = wp_insert_post( array(
+					'post_title'   => $item['title'],
+					'post_content' => 'A curated multi-course career track to get you job-ready.',
+					'post_status'  => 'publish',
+					'post_type'    => 'learning_path',
+				) );
+				update_post_meta( $post_id, '_path_weeks', $item['weeks'] );
+				update_post_meta( $post_id, '_path_courses', $item['courses'] );
+				update_post_meta( $post_id, '_path_badge', $item['badge'] );
+			}
+		}
+	}
+
+	/**
+	 * Seed FAQ Items
+	 */
+	public static function seed_faq() {
+		$faqs = array(
+			array( 'q' => 'Do I need prior experience to start?', 'a' => 'No. Our beginner tracks start from zero and ramp up gradually with project-based lessons.' ),
+			array( 'q' => 'Are the courses bilingual?',          'a' => 'Yes. Every course offers Arabic and English captions, and instructors provide voice intros in both languages.' ),
+			array( 'q' => 'Is there a money-back guarantee?',     'a' => 'Yes — a 30-day money-back guarantee applies to all paid courses, no questions asked.' ),
+			array( 'q' => 'Do I get a certificate?',              'a' => 'Upon completing a course you receive a verifiable certificate you can share on LinkedIn.' ),
+			array( 'q' => 'Can I download the lesson resources?', 'a' => 'Yes. Source code, design files, and slides are downloadable for every enrolled course.' ),
+		);
+
+		$order = 0;
+		foreach ( $faqs as $item ) {
+			$existing = get_page_by_title( $item['q'], OBJECT, 'faq' );
+			if ( ! $existing ) {
+				wp_insert_post( array(
+					'post_title'    => $item['q'],
+					'post_content'  => $item['a'],
+					'post_status'   => 'publish',
+					'post_type'     => 'faq',
+					'menu_order'    => $order,
+				) );
+			}
+			$order++;
+		}
+	}
+
+	/**
+	 * Seed Testimonials
+	 */
+	public static function seed_testimonials() {
+		$items = array(
+			array(
+				'name'   => 'Ahmed Al-Sayed',
+				'role'   => 'Frontend Developer @ Acme',
+				'rating' => '5',
+				'img'    => 'https://images.unsplash.com/photo-1500648767791-00dd994eac43?w=200&auto=format&fit=crop&q=80',
+				'quote'  => 'I went from zero to landing a React role in 4 months. The project-based approach made all the difference.',
+			),
+			array(
+				'name'   => 'Fatima Noor',
+				'role'   => 'UI/UX Designer @ Nimbus',
+				'rating' => '5',
+				'img'    => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&auto=format&fit=crop&q=80',
+				'quote'  => 'The Figma systems course paid for itself ten times over. My handoff process is night and day now.',
+			),
+		);
+
+		foreach ( $items as $item ) {
+			$existing = get_page_by_title( $item['name'], OBJECT, 'testimonial' );
+			if ( ! $existing ) {
+				$post_id = wp_insert_post( array(
+					'post_title'   => $item['name'],
+					'post_content' => $item['quote'],
+					'post_status'  => 'publish',
+					'post_type'    => 'testimonial',
+				) );
+				update_post_meta( $post_id, '_testimonial_role', $item['role'] );
+				update_post_meta( $post_id, '_testimonial_rating', $item['rating'] );
+				update_post_meta( $post_id, '_thumbnail_url', $item['img'] );
+			}
+		}
+	}
+
+	/**
+	 * Seed Team Members
+	 */
+	public static function seed_team() {
+		$members = array(
+			array(
+				'name'   => 'Khaled Reda',
+				'role'   => 'Founder & CEO',
+				'img'    => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+				'social' => 'https://linkedin.com/in/',
+			),
+			array(
+				'name'   => 'Mona Adel',
+				'role'   => 'Head of Curriculum',
+				'img'    => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80',
+				'social' => 'https://linkedin.com/in/',
+			),
+		);
+
+		foreach ( $members as $item ) {
+			$existing = get_page_by_title( $item['name'], OBJECT, 'team' );
+			if ( ! $existing ) {
+				$post_id = wp_insert_post( array(
+					'post_title'   => $item['name'],
+					'post_content' => 'Leads the platform vision and curriculum strategy.',
+					'post_status'  => 'publish',
+					'post_type'    => 'team',
+				) );
+				update_post_meta( $post_id, '_team_role', $item['role'] );
+				update_post_meta( $post_id, '_team_social', $item['social'] );
+				update_post_meta( $post_id, '_thumbnail_url', $item['img'] );
 			}
 		}
 	}

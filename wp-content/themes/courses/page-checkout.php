@@ -14,6 +14,10 @@ $current_user = wp_get_current_user();
 $active_tab   = isset( $_GET['tab'] ) && $_GET['tab'] === 'register' ? 'register' : 'login';
 $auth_err     = isset( $_GET['auth_err'] ) ? sanitize_text_field( $_GET['auth_err'] ) : '';
 $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_msg'] ) : '';
+
+$course_id   = edtech_get_course_id_from_request();
+$course_meta = $course_id ? edtech_get_course_meta( $course_id ) : null;
+$checkout_self = $course_id ? edtech_get_checkout_url( $course_id ) : edtech_page_url( 'checkout' );
 ?>
 
 <main>
@@ -60,10 +64,10 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
 
             <!-- LOGIN FORM -->
             <div id="co-panel-login" style="display:<?php echo $active_tab === 'login' ? 'block' : 'none'; ?>;">
-              <form method="post" action="<?php echo esc_url( home_url( '/checkout' ) ); ?>">
+              <form method="post" action="<?php echo esc_url( $checkout_self ); ?>">
                 <?php wp_nonce_field( 'edtech_login_action', 'edtech_login_nonce' ); ?>
                 <input type="hidden" name="edtech_action" value="login">
-                <input type="hidden" name="redirect_to" value="<?php echo esc_url( home_url( '/checkout' ) ); ?>">
+                <input type="hidden" name="redirect_to" value="<?php echo esc_url( $checkout_self ); ?>">
 
                 <div style="margin-bottom:var(--space-sm);">
                   <label for="co-log" style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;"><?php is_rtl() ? _e('اسم المستخدم أو البريد', 'edtech') : _e('Username or Email', 'edtech'); ?></label>
@@ -81,10 +85,10 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
 
             <!-- REGISTER FORM -->
             <div id="co-panel-register" style="display:<?php echo $active_tab === 'register' ? 'block' : 'none'; ?>;">
-              <form method="post" action="<?php echo esc_url( home_url( '/checkout' ) ); ?>">
+              <form method="post" action="<?php echo esc_url( $checkout_self ); ?>">
                 <?php wp_nonce_field( 'edtech_register_action', 'edtech_register_nonce' ); ?>
                 <input type="hidden" name="edtech_action" value="register">
-                <input type="hidden" name="redirect_to" value="<?php echo esc_url( home_url( '/checkout' ) ); ?>">
+                <input type="hidden" name="redirect_to" value="<?php echo esc_url( $checkout_self ); ?>">
 
                 <div style="margin-bottom:var(--space-sm);">
                   <label for="co-reg-user" style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;"><?php is_rtl() ? _e('اسم المستخدم', 'edtech') : _e('Username', 'edtech'); ?></label>
@@ -142,25 +146,34 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
                 <span style="font-size:12px;color:var(--color-success);font-weight:700;"><?php is_rtl() ? _e('✓ مسجّل الدخول حالياً', 'edtech') : _e('✓ Currently Signed In', 'edtech'); ?></span>
                 <h4 style="font-size:15px;margin:2px 0 0 0;"><?php echo esc_html( $current_user->display_name ); ?> <span style="font-weight:normal;font-size:13px;color:var(--color-text-muted);">(<?php echo esc_html( $current_user->user_email ); ?>)</span></h4>
               </div>
-              <a href="<?php echo esc_url( wp_logout_url( home_url( '/checkout' ) ) ); ?>" style="font-size:12px;color:var(--color-text-muted);text-decoration:underline;"><?php is_rtl() ? _e('تبديل الحساب', 'edtech') : _e('Switch Account', 'edtech'); ?></a>
+              <a href="<?php echo esc_url( wp_logout_url( $checkout_self ) ); ?>" style="font-size:12px;color:var(--color-text-muted);text-decoration:underline;"><?php is_rtl() ? _e('تبديل الحساب', 'edtech') : _e('Switch Account', 'edtech'); ?></a>
             </div>
           </div>
         <?php endif; ?>
 
-        <!-- Payment Card Details -->
+        <!-- Enrollment Form -->
         <div class="card reveal">
-          <h3 style="margin-bottom:var(--space-lg);"><?php is_rtl() ? _e('تفاصيل البطاقة البنكية والاشتراك', 'edtech') : _e('Card Payment Details', 'edtech'); ?></h3>
-          <form id="checkout-form" onsubmit="event.preventDefault();showToast('<?php is_rtl() ? _e('تم التسجيل بنجاح! تفقد بريدك الإلكتروني. 🎉', 'edtech') : _e('Enrollment successful! Check your email. 🎉', 'edtech'); ?>');">
-            <div class="form-group">
-              <label class="form-label" for="cardholder-name"><?php is_rtl() ? _e('اسم صاحب البطاقة / الطالب', 'edtech') : _e('Cardholder / Student Name', 'edtech'); ?></label>
-              <input id="cardholder-name" type="text" class="input-field" value="<?php echo esc_attr( $is_logged_in ? $current_user->display_name : '' ); ?>" placeholder="<?php is_rtl() ? _e('أحمد السيد', 'edtech') : _e('Ahmed Al-Sayed', 'edtech'); ?>" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="card-number"><?php is_rtl() ? _e('رقم البطاقة البنكية', 'edtech') : _e('Card Number', 'edtech'); ?></label>
-              <input id="card-number" type="text" class="input-field" placeholder="4242 4242 4242 4242" required>
-            </div>
-            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:var(--space-md);"><?php is_rtl() ? _e('إتمام الاشتراك — 49$', 'edtech') : _e('Complete Enrollment — $49', 'edtech'); ?></button>
-          </form>
+          <h3 style="margin-bottom:var(--space-lg);"><?php is_rtl() ? _e('إتمام التسجيل', 'edtech') : _e('Complete Enrollment', 'edtech'); ?></h3>
+          <?php if ( $course_id && $course_meta ) : ?>
+            <?php if ( $is_logged_in ) : ?>
+              <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--space-md);">
+                <?php is_rtl() ? _e('اضغط الزر أدناه للتسجيل في الدورة. سيتم إضافتها فوراً إلى لوحة تحكم الطالب.', 'edtech') : _e('Click the button below to enroll. The course will be added to your student dashboard instantly.', 'edtech'); ?>
+              </p>
+              <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <?php wp_nonce_field( 'edtech_enroll', 'edtech_enroll_nonce' ); ?>
+                <input type="hidden" name="action" value="edtech_enroll">
+                <input type="hidden" name="course_id" value="<?php echo esc_attr( $course_id ); ?>">
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+                  <?php is_rtl() ? printf( __( 'إتمام التسجيل — $%s', 'edtech' ), esc_html( $course_meta['price'] ) ) : printf( __( 'Complete Enrollment — $%s', 'edtech' ), esc_html( $course_meta['price'] ) ); ?>
+                </button>
+              </form>
+            <?php else : ?>
+              <p style="font-size:14px;color:var(--color-text-muted);"><?php is_rtl() ? _e('سجّل الدخول أو أنشئ حساباً بالأعلى لإتمام التسجيل.', 'edtech') : _e('Sign in or register above to complete enrollment.', 'edtech'); ?></p>
+            <?php endif; ?>
+          <?php else : ?>
+            <p style="font-size:14px;color:var(--color-text-muted);"><?php is_rtl() ? _e('لم يتم اختيار دورة. تصفح الكتالوج لاختيار دورة.', 'edtech') : _e('No course selected. Browse the catalog to choose a course.', 'edtech'); ?></p>
+            <a href="<?php echo esc_url( get_post_type_archive_link( 'course' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e('تصفح الدورات ←', 'edtech') : _e('Browse Courses →', 'edtech'); ?></a>
+          <?php endif; ?>
         </div>
 
       </div>
@@ -169,14 +182,22 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
       <aside>
         <div class="card">
           <h3 style="margin-bottom:var(--space-md);"><?php is_rtl() ? _e('ملخص الطلب', 'edtech') : _e('Order Summary', 'edtech'); ?></h3>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:var(--space-sm);border-bottom:1px solid var(--color-border);margin-bottom:var(--space-sm);">
-            <span style="font-size:14px;"><?php is_rtl() ? _e('دورة تطوير الويب المتكامل', 'edtech') : _e('Full-Stack Web Dev', 'edtech'); ?></span>
-            <span style="font-weight:600;">$49</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;margin-top:var(--space-sm);">
-            <span><?php is_rtl() ? _e('المجموع الإجمالي', 'edtech') : _e('Total', 'edtech'); ?></span>
-            <span style="color:var(--color-primary);">$49</span>
-          </div>
+          <?php if ( $course_id && $course_meta ) : ?>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:var(--space-sm);border-bottom:1px solid var(--color-border);margin-bottom:var(--space-sm);">
+              <span style="font-size:14px;"><?php echo esc_html( get_the_title( $course_id ) ); ?></span>
+              <?php if ( $course_meta['price_orig'] && $course_meta['price_orig'] > $course_meta['price'] ) : ?>
+                <span><span style="text-decoration:line-through;color:var(--color-text-muted);font-size:12px;margin-inline-end:4px;">$<?php echo esc_html( $course_meta['price_orig'] ); ?></span><span style="font-weight:600;">$<?php echo esc_html( $course_meta['price'] ); ?></span></span>
+              <?php else : ?>
+                <span style="font-weight:600;">$<?php echo esc_html( $course_meta['price'] ); ?></span>
+              <?php endif; ?>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;margin-top:var(--space-sm);">
+              <span><?php is_rtl() ? _e('المجموع الإجمالي', 'edtech') : _e('Total', 'edtech'); ?></span>
+              <span style="color:var(--color-primary);">$<?php echo esc_html( $course_meta['price'] ); ?></span>
+            </div>
+          <?php else : ?>
+            <p style="font-size:14px;color:var(--color-text-muted);"><?php is_rtl() ? _e('لا توجد دورة محددة.', 'edtech') : _e('No course selected.', 'edtech'); ?></p>
+          <?php endif; ?>
         </div>
       </aside>
 

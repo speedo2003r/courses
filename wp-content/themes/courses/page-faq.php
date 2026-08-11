@@ -28,24 +28,33 @@ get_header();
 <section class="section-padding-sm">
   <div class="container container-md">
     <div class="accordion-group">
-      <div class="accordion-item active">
-        <button class="accordion-trigger" aria-expanded="true">
-          <?php is_rtl() ? _e('كيف أسجل في دورة جديدة؟', 'edtech') : _e('How do I enroll in a course?', 'edtech'); ?>
-          <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="accordion-body">
-          <p style="font-size:14px;"><?php is_rtl() ? _e('اضغط على زر اشترك الآن في صفحة تفاصيل أي دورة. ستحصل فوراً على وصول مدى الحياة.', 'edtech') : _e('Click the Enroll Now button on any course page to get immediate lifetime access.', 'edtech'); ?></p>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <button class="accordion-trigger" aria-expanded="false">
-          <?php is_rtl() ? _e('كيف أحصل على شهادة الإتمام؟', 'edtech') : _e('How do I get my certificate of completion?', 'edtech'); ?>
-          <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="accordion-body">
-          <p style="font-size:14px;"><?php is_rtl() ? _e('أكمل جميع الدروس والتقييمات، وتنشأ شهادتك تلقائياً في صفحة الشهادات.', 'edtech') : _e('Complete all lessons and assessments to automatically generate your verified certificate.', 'edtech'); ?></p>
-        </div>
-      </div>
+      <?php
+      $faqs = new WP_Query( array(
+        'post_type'      => 'faq',
+        'posts_per_page' => 20,
+        'orderby'        => 'menu_order',
+        'order'          => 'ASC',
+        'post_status'    => 'publish',
+      ) );
+      if ( $faqs->have_posts() ) :
+        $first = true;
+        while ( $faqs->have_posts() ) : $faqs->the_post(); ?>
+          <div class="accordion-item<?php echo $first ? ' active' : ''; ?>">
+            <button class="accordion-trigger" aria-expanded="<?php echo $first ? 'true' : 'false'; ?>">
+              <?php the_title(); ?>
+              <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <?php the_content(); ?>
+            </div>
+          </div>
+          <?php
+          $first = false;
+        endwhile;
+        wp_reset_postdata();
+      else : ?>
+        <p style="color:var(--color-text-muted);text-align:center;"><?php is_rtl() ? _e('لا توجد أسئلة شائعة بعد. أضفها من لوحة التحكم.', 'edtech') : _e('No FAQ items yet. Add them from the admin.', 'edtech'); ?></p>
+      <?php endif; ?>
     </div>
   </div>
 </section>

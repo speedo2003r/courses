@@ -21,7 +21,11 @@ get_header();
       <?php
       if ( have_posts() ) :
         while ( have_posts() ) : the_post();
-          get_template_part( 'template-parts/content-course-card' );
+          if ( 'course' === get_post_type() ) {
+            get_template_part( 'template-parts/content-course-card' );
+          } else {
+            get_template_part( 'template-parts/content-post-card' );
+          }
         endwhile;
       else :
         ?>

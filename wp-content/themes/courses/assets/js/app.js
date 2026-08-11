@@ -103,9 +103,16 @@
   document.querySelectorAll('[data-target]').forEach(el => statObserver.observe(el));
 
   // ---- Active Nav Link ----
-  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+  const currentPath = window.location.pathname.replace(/\/+$/, '');
   document.querySelectorAll('.nav-link').forEach(link => {
-    if (link.getAttribute('href') === currentPath) link.classList.add('active');
+    const linkPath = (link.getAttribute('href') || '').replace(/^https?:\/\/[^\/]+/, '').replace(/\/+$/, '');
+    const dataNav  = link.dataset.nav || '';
+    // Match by pathname, or by data-nav attribute.
+    if (linkPath && linkPath === currentPath) {
+      link.classList.add('active');
+    } else if (dataNav && currentPath.includes('/' + dataNav)) {
+      link.classList.add('active');
+    }
   });
 
   // ---- Mobile Hamburger ----
