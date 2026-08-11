@@ -9,7 +9,7 @@ get_header();
 
 while ( have_posts() ) : the_post();
 	$post_id  = get_the_ID();
-	$title    = get_post_meta( $post_id, '_instructor_title', true );
+	$title    = edtech_get_bilingual_meta( $post_id, '_instructor_title' );
 	$audio    = get_post_meta( $post_id, '_instructor_audio_url', true );
 	$rating   = get_post_meta( $post_id, '_instructor_rating', true ) ?: '4.9';
 	$students = get_post_meta( $post_id, '_instructor_students', true );

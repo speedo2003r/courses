@@ -48,7 +48,7 @@ get_header();
       }
       $feat_cat_name = ! empty( $feat_cats ) ? $feat_cats[0]->name : '';
     ?>
-    <div class="card course-card reveal" data-category="<?php echo esc_attr( implode( ' ', $feat_slugs ) ); ?>" style="display:grid;grid-template-columns:55fr 45fr;gap:0;padding:0;overflow:hidden;margin-bottom:var(--space-xl);">
+    <div class="card course-card reveal layout-featured-card" data-category="<?php echo esc_attr( implode( ' ', $feat_slugs ) ); ?>">
       <div style="aspect-ratio:16/9;overflow:hidden;">
         <a href="<?php echo esc_url( $feat_link ); ?>">
           <img src="<?php echo esc_url( $feat_thumb ); ?>" alt="<?php echo esc_attr( $feat_title ); ?>" loading="eager" style="width:100%;height:100%;object-fit:cover;">

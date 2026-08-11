@@ -48,7 +48,7 @@ while ( have_posts() ) : the_post();
 	<!-- Course Body -->
 	<section class="section-padding-sm">
 	  <div class="container">
-	    <div style="display:grid;grid-template-columns:65fr 35fr;gap:var(--space-xl);align-items:start;">
+	    <div class="split-detail">
 
 	      <!-- Main Content -->
 	      <div>

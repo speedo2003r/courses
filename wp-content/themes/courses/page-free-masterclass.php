@@ -29,7 +29,7 @@ get_header();
 <!-- Content -->
 <section class="section-padding-sm">
   <div class="container">
-    <div style="display:grid;grid-template-columns:70fr 30fr;gap:var(--space-xl);align-items:start;">
+    <div class="split-detail">
 
       <!-- Video Player -->
       <div>

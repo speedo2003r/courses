@@ -26,7 +26,7 @@ get_header();
       $portfolio = get_user_meta( $current_user->ID, '_edtech_portfolio', true );
     ?>
 
-    <div style="display:grid;grid-template-columns:240px 1fr;gap:var(--space-xl);">
+    <div class="layout-profile">
       <nav class="card" style="padding:var(--space-md);">
         <a class="nav-link active" href="#profile"><?php is_rtl() ? _e('👤 الملف الشخصي', 'edtech') : _e('👤 Profile', 'edtech'); ?></a>
         <a class="nav-link" href="#security"><?php is_rtl() ? _e('🔒 الأمان', 'edtech') : _e('🔒 Security', 'edtech'); ?></a>

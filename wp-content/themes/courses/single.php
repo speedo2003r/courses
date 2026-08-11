@@ -75,7 +75,7 @@ $tags = get_the_tags();
 <!-- Main Body: Article Content & Sidebar -->
 <section class="section-padding">
   <div class="container">
-    <div style="display:grid;grid-template-columns:68fr 32fr;gap:var(--space-xl);align-items:start;">
+    <div class="split-detail">
       
       <!-- Article Content Column -->
       <article class="reveal" style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);box-shadow:var(--shadow-sm);">

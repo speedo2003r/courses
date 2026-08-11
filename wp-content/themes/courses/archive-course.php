@@ -36,7 +36,7 @@ get_header();
 <!-- Catalog Layout -->
 <section class="section-padding-sm">
   <div class="container">
-    <div style="display:grid;grid-template-columns:280px 1fr;gap:var(--space-xl);align-items:start;">
+    <div class="layout-sidebar-content">
 
       <!-- Sidebar Filters -->
       <aside class="filter-sidebar" style="position:sticky;top:88px;border:1px solid var(--color-border-subtle);border-radius:var(--radius-lg);background:var(--color-bg-card);padding:var(--space-lg);">
@@ -54,7 +54,7 @@ get_header();
 
       <!-- Course Grid -->
       <div>
-        <div id="catalog-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-lg);">
+        <div id="catalog-grid" class="grid grid-3">
           <?php
           if ( have_posts() ) :
             while ( have_posts() ) : the_post();

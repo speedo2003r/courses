@@ -82,10 +82,130 @@
   flex-wrap: nowrap;
 }
 
+/* Hamburger button — hidden on desktop, shown on tablet/mobile */
 .nav-hamburger {
   display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
+.nav-hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  margin-inline: auto;
+  background: var(--color-text-title);
+  border-radius: 2px;
+  transition: transform var(--motion-fast), opacity var(--motion-fast);
+}
+
+/* Hamburger → X animation when open */
+.nav-hamburger[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ===== MOBILE MENU PANEL ===== */
+.mobile-menu {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  block-size: 100vh;
+  width: min(360px, 85vw);
+  background: var(--color-bg-card);
+  box-shadow: var(--elevation-modal);
+  z-index: 2001;
+  overflow-y: auto;
+  padding: var(--space-xl) var(--space-lg) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  transform: translateX(100%);
+  transition: transform var(--motion-slow);
+  visibility: hidden;
+}
+
+[dir="rtl"] .mobile-menu {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
+  transform: translateX(-100%);
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: var(--glass-blur-sm);
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-base);
+}
+
+.mobile-menu-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
+}
+
+.mobile-nav-links .nav-link,
+.mobile-nav-links a {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-title);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  transition: color var(--motion-fast), background-color var(--motion-fast);
+}
+
+.mobile-nav-links .nav-link:hover,
+.mobile-nav-links .nav-link.active,
+.mobile-nav-links a:hover {
+  color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.mobile-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.mobile-menu-actions .btn {
+  width: 100%;
+  height: 48px;
+}
+
+/* Navbar responsive: hide nav-links, show hamburger on tablet/mobile */
 @media (max-width: 1023px) {
   .nav-links {
     display: none;
@@ -93,6 +213,20 @@
 
   .nav-hamburger {
     display: flex;
+  }
+
+  /* Hide dashboard/enroll buttons from the top bar on mobile to save space.
+     They reappear inside the mobile menu panel. */
+  .nav-action-dashboard,
+  .nav-action-enroll {
+    display: none;
+  }
+}
+
+/* On very small phones, also hide the language switcher from the bar (it's in the panel too) */
+@media (max-width: 479px) {
+  .lang-switcher-btn {
+    display: none;
   }
 }
 

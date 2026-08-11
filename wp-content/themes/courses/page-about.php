@@ -44,7 +44,7 @@ get_header();
       $team = new WP_Query( array( 'post_type' => 'team', 'posts_per_page' => -1, 'post_status' => 'publish' ) );
       if ( $team->have_posts() ) :
         while ( $team->have_posts() ) : $team->the_post();
-          $role = get_post_meta( get_the_ID(), '_team_role', true );
+          $role = edtech_get_bilingual_meta( get_the_ID(), '_team_role' );
           $img  = edtech_get_post_image( get_the_ID(), 'medium', 'https://placehold.co/300x300/1f2937/e5e7eb?text=Team' );
           $social = get_post_meta( get_the_ID(), '_team_social', true );
           ?>

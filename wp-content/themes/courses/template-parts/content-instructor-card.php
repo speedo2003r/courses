@@ -15,7 +15,7 @@ $post_id = ! empty( $args['post_id'] ) ? $args['post_id'] : get_the_ID();
 if ( $post_id && 'instructor' === get_post_type( $post_id ) ) {
 	// Loop / explicit post context — read everything from WP data.
 	$name   = get_the_title( $post_id );
-	$title  = get_post_meta( $post_id, '_instructor_title', true );
+	$title  = edtech_get_bilingual_meta( $post_id, '_instructor_title' );
 	$img    = edtech_get_post_image( $post_id, 'medium' );
 	$audio  = get_post_meta( $post_id, '_instructor_audio_url', true );
 	$rating = get_post_meta( $post_id, '_instructor_rating', true );

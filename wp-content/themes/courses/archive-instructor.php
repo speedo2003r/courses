@@ -30,7 +30,7 @@ $stat_instructors = isset( $instructor_count->publish ) ? (int) $instructor_coun
 <!-- Impact Stats Bar -->
 <section style="background:var(--color-primary);padding-block:var(--space-lg);">
   <div class="container">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-md);text-align:center;">
+    <div class="grid grid-4" style="text-align:center;">
       <div><div style="font-size:1.75rem;font-weight:800;color:white;" data-target="<?php echo esc_attr( (int) $stat_students ); ?>">0</div><div style="font-size:13px;color:rgba(255,255,255,0.8);"><?php is_rtl() ? _e('طالب نشط', 'edtech') : _e('Active Students', 'edtech'); ?></div></div>
       <div><div style="font-size:1.75rem;font-weight:800;color:white;">★ 4.9</div><div style="font-size:13px;color:rgba(255,255,255,0.8);"><?php is_rtl() ? _e('متوسط التقييم', 'edtech') : _e('Average Rating', 'edtech'); ?></div></div>
       <div><div style="font-size:1.75rem;font-weight:800;color:white;" data-target="<?php echo esc_attr( $stat_instructors ); ?>">0</div><div style="font-size:13px;color:rgba(255,255,255,0.8);"><?php is_rtl() ? _e('مدربين خبراء', 'edtech') : _e('Expert Instructors', 'edtech'); ?></div></div>
@@ -42,7 +42,7 @@ $stat_instructors = isset( $instructor_count->publish ) ? (int) $instructor_coun
 <!-- Instructor Grid -->
 <section class="section-padding">
   <div class="container">
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-xl);">
+    <div class="grid grid-2">
       <?php
       if ( have_posts() ) :
         while ( have_posts() ) : the_post();

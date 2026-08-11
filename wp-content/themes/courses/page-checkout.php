@@ -25,7 +25,7 @@ $checkout_self = $course_id ? edtech_get_checkout_url( $course_id ) : edtech_pag
   <div class="container container-wide">
     <h1 style="margin-bottom:var(--space-xl);"><?php is_rtl() ? _e('الدفع والتسجيل الآمن', 'edtech') : _e('Secure Checkout', 'edtech'); ?></h1>
 
-    <div style="display:grid;grid-template-columns:1fr 400px;gap:var(--space-xl);">
+    <div class="layout-content-aside-wide">
 
       <!-- Left Column: Auth + Payment Form -->
       <div>

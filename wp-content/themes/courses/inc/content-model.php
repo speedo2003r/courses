@@ -9,6 +9,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Bilingual helpers: store Arabic in _title_ar / _content_ar post meta.
+ * Filters on the_title / the_content swap automatically when is_rtl().
+ */
+
+function edtech_bilingual_title( $title, $post_id = 0 ) {
+	if ( ! is_rtl() || ! $post_id ) {
+		return $title;
+	}
+	// Skip admin screens — let the admin see the canonical English title.
+	if ( is_admin() ) {
+		return $title;
+	}
+	$ar = get_post_meta( $post_id, '_title_ar', true );
+	return $ar ? $ar : $title;
+}
+add_filter( 'the_title', 'edtech_bilingual_title', 10, 2 );
+
+function edtech_bilingual_content( $content ) {
+	if ( ! is_rtl() || ! in_the_loop() ) {
+		return $content;
+	}
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return $content;
+	}
+	$ar = get_post_meta( $post_id, '_content_ar', true );
+	return $ar ? $ar : $content;
+}
+add_filter( 'the_content', 'edtech_bilingual_content' );
+
+/**
+ * Read a text meta field in the current language.
+ * Looks for <key>_ar when RTL, falls back to the English value.
+ */
+function edtech_get_bilingual_meta( $post_id, $key ) {
+	if ( is_rtl() ) {
+		$ar = get_post_meta( $post_id, $key . '_ar', true );
+		if ( $ar ) {
+			return $ar;
+		}
+	}
+	return get_post_meta( $post_id, $key, true );
+}
+
 function edtech_page_url( $slug ) {
 	$page = get_page_by_path( sanitize_title( $slug ) );
 	return $page ? get_permalink( $page ) : home_url( '/' . trim( $slug, '/' ) . '/' );
@@ -26,6 +71,8 @@ function edtech_get_site_setting( $key, $default = '' ) {
 /**
  * Resolve a post's display image: real featured thumbnail first, then a
  * _thumbnail_url meta value (used by the seeder), then a placeholder.
+ * Relative paths are prefixed with the template directory URI so locally
+ * bundled images work without hardcoding a domain.
  */
 function edtech_get_post_image( $post_id = 0, $size = 'medium_large', $placeholder = '' ) {
 	$post_id = $post_id ?: get_the_ID();
@@ -35,7 +82,11 @@ function edtech_get_post_image( $post_id = 0, $size = 'medium_large', $placehold
 	}
 	$url = get_post_meta( $post_id, '_thumbnail_url', true );
 	if ( $url ) {
-		return $url;
+		// Absolute URL — return as-is. Relative path — prefix with theme URI.
+		if ( 0 === strpos( $url, 'http' ) || 0 === strpos( $url, '/' ) ) {
+			return $url;
+		}
+		return get_template_directory_uri() . '/' . $url;
 	}
 	return $placeholder ?: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80';
 }
@@ -75,9 +126,16 @@ function edtech_get_course_meta( $post_id ) {
 		'outcomes'      => '',
 		'skills'        => '',
 	);
+	// Text fields that have _ar variants for bilingual support.
+	$text_fields = array( 'syllabus', 'outcomes', 'skills', 'instructor' );
 	$values = array();
 	foreach ( $defaults as $key => $default ) {
-		$value          = get_post_meta( $post_id, '_course_' . $key, true );
+		$meta_key = '_course_' . $key;
+		if ( in_array( $key, $text_fields, true ) ) {
+			$value = edtech_get_bilingual_meta( $post_id, $meta_key );
+		} else {
+			$value = get_post_meta( $post_id, $meta_key, true );
+		}
 		$values[ $key ] = '' !== $value ? $value : $default;
 	}
 	return $values;

@@ -437,7 +437,8 @@ function edtech_render_stars( $rating = 4.9 ) {
  * Fallback for wp_nav_menu() — prints the standard page list as nav links
  * so navigation works before an admin creates a custom menu.
  */
-function edtech_nav_menu_fallback() {
+function edtech_nav_menu_fallback( $args = array() ) {
+	$menu_class = ! empty( $args['menu_class'] ) ? $args['menu_class'] : 'nav-links';
 	$items = array(
 		'catalog'         => array( is_rtl() ? 'الدورات' : 'Courses', get_post_type_archive_link( 'course' ) ),
 		'learning-paths'   => array( is_rtl() ? 'مسارات التعلم' : 'Learning Paths', edtech_page_url( 'learning-paths' ) ),
@@ -447,7 +448,7 @@ function edtech_nav_menu_fallback() {
 		'about'            => array( is_rtl() ? 'من نحن' : 'About', edtech_page_url( 'about' ) ),
 		'faq'              => array( is_rtl() ? 'الدعم' : 'FAQ', edtech_page_url( 'faq' ) ),
 	);
-	echo '<ul class="nav-links" role="list">';
+	printf( '<ul class="%s" role="list">', esc_attr( $menu_class ) );
 	foreach ( $items as $slug => $data ) {
 		printf(
 			'<li><a href="%s" class="nav-link" data-nav="%s">%s</a></li>',

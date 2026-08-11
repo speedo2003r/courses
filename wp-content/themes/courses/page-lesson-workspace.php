@@ -33,7 +33,7 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
   <?php endif; ?>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 300px;min-height:calc(100vh - 56px);">
+<div class="split-workspace" style="min-height:calc(100vh - 56px);">
   <div>
     <div class="video-container" style="border-radius:0;aspect-ratio:16/9;">
       <img src="<?php echo esc_url( edtech_get_post_image( $course_id, 'large', 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1400&auto=format&fit=crop&q=80' ) ); ?>" alt="" style="width:100%;height:100%;object-fit:cover;">

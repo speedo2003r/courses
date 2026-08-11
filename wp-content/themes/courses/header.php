@@ -42,11 +42,43 @@
         <a href="<?php echo esc_url( add_query_arg( 'lang', 'ar' ) ); ?>" class="btn btn-ghost lang-switcher-btn" data-lang="ar">العربية</a>
       <?php endif; ?>
       <?php if ( is_user_logged_in() ) : ?>
-        <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
+        <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary nav-action-dashboard"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
       <?php else : ?>
-        <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'تسجيل الدخول', 'edtech' ) : _e( 'Sign In', 'edtech' ); ?></a>
+        <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary nav-action-dashboard"><?php is_rtl() ? _e( 'تسجيل الدخول', 'edtech' ) : _e( 'Sign In', 'edtech' ); ?></a>
       <?php endif; ?>
-      <a href="<?php echo esc_url( edtech_page_url( 'checkout' ) ); ?>" class="btn btn-primary" id="hero-enroll-cta"><?php is_rtl() ? _e( 'اشترك الآن', 'edtech' ) : _e( 'Enroll Now', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( edtech_page_url( 'checkout' ) ); ?>" class="btn btn-primary nav-action-enroll" id="hero-enroll-cta"><?php is_rtl() ? _e( 'اشترك الآن', 'edtech' ) : _e( 'Enroll Now', 'edtech' ); ?></a>
+      <button class="nav-hamburger" aria-label="<?php esc_attr_e( 'Toggle navigation menu', 'edtech' ); ?>" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
+
+<!-- ===== MOBILE MENU PANEL ===== -->
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="<?php esc_attr_e( 'Mobile navigation', 'edtech' ); ?>">
+  <nav aria-label="<?php esc_attr_e( 'Mobile navigation', 'edtech' ); ?>">
+    <?php
+    wp_nav_menu( array(
+      'theme_location' => 'primary',
+      'menu_class'     => 'mobile-nav-links',
+      'container'      => false,
+      'fallback_cb'    => 'edtech_nav_menu_fallback',
+      'depth'          => 1,
+    ) );
+    ?>
+  </nav>
+  <div class="mobile-menu-actions">
+    <?php if ( is_rtl() ) : ?>
+      <a href="<?php echo esc_url( add_query_arg( 'lang', 'en' ) ); ?>" class="btn btn-ghost"><?php _e( 'English', 'edtech' ); ?></a>
+    <?php else : ?>
+      <a href="<?php echo esc_url( add_query_arg( 'lang', 'ar' ) ); ?>" class="btn btn-ghost">العربية</a>
+    <?php endif; ?>
+    <?php if ( is_user_logged_in() ) : ?>
+      <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
+    <?php else : ?>
+      <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'تسجيل الدخول', 'edtech' ) : _e( 'Sign In', 'edtech' ); ?></a>
+    <?php endif; ?>
+    <a href="<?php echo esc_url( edtech_page_url( 'checkout' ) ); ?>" class="btn btn-primary"><?php is_rtl() ? _e( 'اشترك الآن', 'edtech' ) : _e( 'Enroll Now', 'edtech' ); ?></a>
+  </div>
+</div>
+<div class="mobile-menu-backdrop" id="mobile-menu-backdrop" aria-hidden="true"></div>

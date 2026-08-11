@@ -159,7 +159,7 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 300px;gap:var(--space-xl);">
+      <div class="layout-content-aside">
         <div>
           <!-- Active Course Banner -->
           <?php if ( $active_course ) :
