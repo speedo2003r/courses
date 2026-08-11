@@ -42,7 +42,7 @@
         <a href="<?php echo esc_url( add_query_arg( 'lang', 'ar' ) ); ?>" class="btn btn-ghost lang-switcher-btn" data-lang="ar">العربية</a>
       <?php endif; ?>
       <?php if ( is_user_logged_in() ) : ?>
-        <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary nav-action-dashboard"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
+        <a href="<?php echo esc_url( edtech_get_dashboard_url() ); ?>" class="btn btn-secondary nav-action-dashboard"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
       <?php else : ?>
         <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary nav-action-dashboard"><?php is_rtl() ? _e( 'تسجيل الدخول', 'edtech' ) : _e( 'Sign In', 'edtech' ); ?></a>
       <?php endif; ?>
@@ -74,7 +74,7 @@
       <a href="<?php echo esc_url( add_query_arg( 'lang', 'ar' ) ); ?>" class="btn btn-ghost">العربية</a>
     <?php endif; ?>
     <?php if ( is_user_logged_in() ) : ?>
-      <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( edtech_get_dashboard_url() ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
     <?php else : ?>
       <a href="<?php echo esc_url( edtech_page_url( 'student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'تسجيل الدخول', 'edtech' ) : _e( 'Sign In', 'edtech' ); ?></a>
     <?php endif; ?>

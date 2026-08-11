@@ -101,6 +101,34 @@ function edtech_get_checkout_url( $course_id = 0 ) {
 	return $course_id ? add_query_arg( 'course_id', absint( $course_id ), $url ) : $url;
 }
 
+/**
+ * Check whether a user is an instructor (has authored at least one course).
+ *
+ * @param int $user_id Defaults to current user.
+ * @return bool
+ */
+function edtech_is_instructor( $user_id = 0 ) {
+	$user_id = $user_id ?: get_current_user_id();
+	if ( ! $user_id ) {
+		return false;
+	}
+	return count_user_posts( $user_id, 'course', true ) > 0;
+}
+
+/**
+ * Return the appropriate dashboard URL for the current user.
+ * Instructors (users who authored courses) get the instructor dashboard;
+ * everyone else gets the student dashboard.
+ *
+ * @return string
+ */
+function edtech_get_dashboard_url() {
+	if ( is_user_logged_in() && edtech_is_instructor() ) {
+		return edtech_page_url( 'instructor-dashboard' );
+	}
+	return edtech_page_url( 'student-dashboard' );
+}
+
 function edtech_get_enrolled_course_ids( $user_id = 0 ) {
 	$user_id = $user_id ?: get_current_user_id();
 	$ids     = get_user_meta( $user_id, '_edtech_enrolled_courses', true );

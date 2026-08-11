@@ -944,6 +944,13 @@ select.input-field {
   display: block;
 }
 
+/* Hide PIP float on mobile — too small to be useful, saves screen space */
+@media (max-width: 767px) {
+  .video-pip {
+    display: none !important;
+  }
+}
+
 /* ===== TABS ===== */
 .tabs {
   display: flex;

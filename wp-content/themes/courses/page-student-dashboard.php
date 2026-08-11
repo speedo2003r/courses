@@ -153,7 +153,12 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
           </h1>
           <p style="color:var(--color-text-muted);margin:0;"><?php printf( esc_html( is_rtl() ? 'أنت مسجّل في %d دورة.' : 'You are enrolled in %d courses.' ), count( $my_courses ) ); ?></p>
         </div>
-        <div style="display:flex;gap:var(--space-sm);align-items:center;">
+        <div style="display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap;">
+          <?php if ( edtech_is_instructor( $current_user->ID ) ) : ?>
+            <a href="<?php echo esc_url( edtech_page_url( 'instructor-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحة المدرب', 'edtech' ) : _e( 'Creator Dashboard', 'edtech' ); ?></a>
+          <?php else : ?>
+            <a href="<?php echo esc_url( edtech_page_url( 'course-builder' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'أنشئ أول دورة', 'edtech' ) : _e( 'Create a Course', 'edtech' ); ?></a>
+          <?php endif; ?>
           <a href="<?php echo esc_url( get_post_type_archive_link( 'course' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'تصفح الدورات', 'edtech' ) : _e( 'Browse Courses', 'edtech' ); ?></a>
           <a href="<?php echo esc_url( wp_logout_url( edtech_page_url( 'student-dashboard' ) ) ); ?>" class="btn btn-ghost" style="color:var(--color-accent);"><?php is_rtl() ? _e( 'تسجيل الخروج', 'edtech' ) : _e( 'Log Out', 'edtech' ); ?></a>
         </div>
