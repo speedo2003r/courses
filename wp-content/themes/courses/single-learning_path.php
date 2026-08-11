@@ -11,7 +11,7 @@ while ( have_posts() ) : the_post();
 	$post_id  = get_the_ID();
 	$weeks    = get_post_meta( $post_id, '_path_weeks', true );
 	$pcourses = get_post_meta( $post_id, '_path_courses', true );
-	$badge    = get_post_meta( $post_id, '_path_badge', true );
+	$badge    = edtech_get_bilingual_meta( $post_id, '_path_badge' );
 	$img      = edtech_get_post_image( $post_id, 'large' );
 	?>
 	<main>

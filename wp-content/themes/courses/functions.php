@@ -45,6 +45,60 @@ function edtech_setup() {
 add_action( 'after_setup_theme', 'edtech_setup' );
 
 /**
+ * Auto-create critical pages on theme activation.
+ * Ensures pages like /course-builder/ exist on any server the theme is
+ * activated on, even if the seeder hasn't been run yet.
+ */
+function edtech_ensure_pages_on_activation() {
+	edtech_ensure_critical_pages();
+}
+add_action( 'after_switch_theme', 'edtech_ensure_pages_on_activation' );
+
+/**
+ * Self-healing: check for missing critical pages on init (once per hour).
+ * If a page was deleted or never created, it gets recreated automatically.
+ */
+function edtech_ensure_critical_pages() {
+	// Use a transient so we don't query on every single page load.
+	if ( get_transient( 'edtech_pages_checked' ) ) {
+		return;
+	}
+
+	$pages = array(
+		'course-builder' => array(
+			'title'    => 'Course Builder',
+			'template'  => 'page-course-builder.php',
+		),
+	);
+
+	$created = false;
+	foreach ( $pages as $slug => $args ) {
+		$existing = get_page_by_path( $slug, OBJECT, 'page' );
+		if ( ! $existing ) {
+			$page_id = wp_insert_post( array(
+				'post_title'  => $args['title'],
+				'post_name'   => $slug,
+				'post_status' => 'publish',
+				'post_type'   => 'page',
+				'post_content' => '',
+			) );
+			if ( $page_id && ! is_wp_error( $page_id ) ) {
+				update_post_meta( $page_id, '_wp_page_template', $args['template'] );
+				$created = true;
+			}
+		}
+	}
+
+	if ( $created ) {
+		flush_rewrite_rules();
+	}
+
+	// Don't check again for an hour.
+	set_transient( 'edtech_pages_checked', 1, HOUR_IN_SECONDS );
+}
+add_action( 'init', 'edtech_ensure_critical_pages' );
+
+/**
  * Language Switcher Handling (Arabic <-> English)
  */
 function edtech_init_language() {
@@ -506,10 +560,15 @@ function edtech_render_instructor_metabox( $post ) {
 	wp_nonce_field( 'edtech_instructor_meta_nonce', 'instructor_meta_nonce' );
 	$audio_url = get_post_meta( $post->ID, '_instructor_audio_url', true );
 	$title     = get_post_meta( $post->ID, '_instructor_title', true );
+	$title_ar  = get_post_meta( $post->ID, '_instructor_title_ar', true );
 	?>
 	<p>
 		<label for="_instructor_title"><strong><?php _e( 'المسمى الوظيفي (Job Title):', 'edtech' ); ?></strong></label><br>
 		<input type="text" id="_instructor_title" name="_instructor_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" placeholder="Senior Full-Stack Architect">
+	</p>
+	<p>
+		<label for="_instructor_title_ar"><strong><?php _e( 'المسمى الوظيفي بالعربية (Job Title - Arabic):', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_instructor_title_ar" name="_instructor_title_ar" value="<?php echo esc_attr( $title_ar ); ?>" class="widefat" placeholder="مهندس Full-Stack أول">
 	</p>
 	<p>
 		<label for="_instructor_audio_url"><strong><?php _e( 'رابط المقدمة الصوتية (Voice Intro Audio URL):', 'edtech' ); ?></strong></label><br>
@@ -531,6 +590,9 @@ function edtech_save_instructor_meta( $post_id ) {
 	}
 	if ( isset( $_POST['_instructor_title'] ) ) {
 		update_post_meta( $post_id, '_instructor_title', sanitize_text_field( $_POST['_instructor_title'] ) );
+	}
+	if ( isset( $_POST['_instructor_title_ar'] ) ) {
+		update_post_meta( $post_id, '_instructor_title_ar', sanitize_text_field( $_POST['_instructor_title_ar'] ) );
 	}
 }
 add_action( 'save_post_instructor', 'edtech_save_instructor_meta' );

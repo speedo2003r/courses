@@ -247,6 +247,26 @@ function edtech_render_course_metabox( $post ) {
 	}
 	echo '</tbody></table>';
 
+	// Arabic text fields
+	$ar_text_fields = array(
+		'duration'   => __( 'Duration (Arabic)', 'edtech' ),
+		'badge'      => __( 'Badge (Arabic)', 'edtech' ),
+		'instructor'  => __( 'Instructor name (Arabic)', 'edtech' ),
+	);
+	echo '<h3>' . esc_html__( 'Arabic Fields (الحقول العربية)', 'edtech' ) . '</h3>';
+	echo '<table class="form-table"><tbody>';
+	foreach ( $ar_text_fields as $key => $label ) {
+		$ar_val = get_post_meta( $post->ID, '_course_' . $key . '_ar', true );
+		printf(
+			'<tr><th><label for="course-%1$s-ar">%2$s</label></th><td><input class="regular-text" id="course-%1$s-ar" name="_course_%1$s_ar" value="%3$s" placeholder="%4$s"></td></tr>',
+			esc_attr( $key ),
+			esc_html( $label ),
+			esc_attr( $ar_val ),
+			esc_attr( $meta[ $key ] )
+		);
+	}
+	echo '</tbody></table>';
+
 	$textarea_fields = array(
 		'skills'   => __( 'Skills Gained (one per line, prefix with ✓)', 'edtech' ),
 		'outcomes' => __( 'Project Showcase / Outcomes (HTML allowed)', 'edtech' ),
@@ -259,6 +279,25 @@ function edtech_render_course_metabox( $post ) {
 			esc_attr( $key ),
 			esc_html( $label ),
 			esc_textarea( $meta[ $key ] )
+		);
+	}
+	echo '</tbody></table>';
+
+	// Arabic textarea fields
+	$ar_textarea_fields = array(
+		'skills'   => __( 'Skills Gained (Arabic)', 'edtech' ),
+		'outcomes' => __( 'Project Showcase / Outcomes (Arabic)', 'edtech' ),
+		'syllabus' => __( 'Course Syllabus (Arabic)', 'edtech' ),
+	);
+	echo '<table class="form-table"><tbody>';
+	foreach ( $ar_textarea_fields as $key => $label ) {
+		$ar_val = get_post_meta( $post->ID, '_course_' . $key . '_ar', true );
+		printf(
+			'<tr><th><label for="course-%1$s-ar">%2$s</label></th><td><textarea rows="6" class="large-text" id="course-%1$s-ar" name="_course_%1$s_ar" placeholder="%3$s">%4$s</textarea></td></tr>',
+			esc_attr( $key ),
+			esc_html( $label ),
+			esc_attr( $meta[ $key ] ),
+			esc_textarea( $ar_val )
 		);
 	}
 	echo '</tbody></table>';
@@ -281,6 +320,10 @@ function edtech_save_course_meta( $post_id ) {
 		if ( isset( $_POST[ '_course_' . $field ] ) ) {
 			update_post_meta( $post_id, '_course_' . $field, sanitize_text_field( wp_unslash( $_POST[ '_course_' . $field ] ) ) );
 		}
+		// Arabic text fields
+		if ( isset( $_POST[ '_course_' . $field . '_ar' ] ) ) {
+			update_post_meta( $post_id, '_course_' . $field . '_ar', sanitize_text_field( wp_unslash( $_POST[ '_course_' . $field . '_ar' ] ) ) );
+		}
 	}
 	foreach ( $int_fields as $field ) {
 		if ( isset( $_POST[ '_course_' . $field ] ) ) {
@@ -299,6 +342,10 @@ function edtech_save_course_meta( $post_id ) {
 		if ( isset( $_POST[ '_course_' . $field ] ) ) {
 			update_post_meta( $post_id, '_course_' . $field, wp_kses_post( wp_unslash( $_POST[ '_course_' . $field ] ) ) );
 		}
+		// Arabic HTML fields
+		if ( isset( $_POST[ '_course_' . $field . '_ar' ] ) ) {
+			update_post_meta( $post_id, '_course_' . $field . '_ar', wp_kses_post( wp_unslash( $_POST[ '_course_' . $field . '_ar' ] ) ) );
+		}
 	}
 }
 add_action( 'save_post_course', 'edtech_save_course_meta' );
@@ -312,12 +359,22 @@ function edtech_register_extra_meta() {
 		'sanitize_callback' => 'sanitize_text_field',
 		'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
 	) );
+	register_post_meta( 'testimonial', '_testimonial_role_ar', array(
+		'type' => 'string', 'single' => true, 'show_in_rest' => true,
+		'sanitize_callback' => 'sanitize_text_field',
+		'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
+	) );
 	register_post_meta( 'testimonial', '_testimonial_rating', array(
 		'type' => 'number', 'single' => true, 'show_in_rest' => true,
 		'sanitize_callback' => function( $v ) { return max( 0, min( 5, (float) $v ) ); },
 		'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
 	) );
 	register_post_meta( 'team', '_team_role', array(
+		'type' => 'string', 'single' => true, 'show_in_rest' => true,
+		'sanitize_callback' => 'sanitize_text_field',
+		'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
+	) );
+	register_post_meta( 'team', '_team_role_ar', array(
 		'type' => 'string', 'single' => true, 'show_in_rest' => true,
 		'sanitize_callback' => 'sanitize_text_field',
 		'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
@@ -341,12 +398,17 @@ add_action( 'add_meta_boxes', 'edtech_add_extra_metaboxes' );
 
 function edtech_render_testimonial_metabox( $post ) {
 	wp_nonce_field( 'edtech_save_testimonial', 'edtech_testimonial_nonce' );
-	$role   = get_post_meta( $post->ID, '_testimonial_role', true );
-	$rating = get_post_meta( $post->ID, '_testimonial_rating', true );
+	$role     = get_post_meta( $post->ID, '_testimonial_role', true );
+	$role_ar  = get_post_meta( $post->ID, '_testimonial_role_ar', true );
+	$rating   = get_post_meta( $post->ID, '_testimonial_rating', true );
 	?>
 	<p>
 		<label for="_testimonial_role"><strong><?php _e( 'Role / Company', 'edtech' ); ?></strong></label><br>
 		<input type="text" id="_testimonial_role" name="_testimonial_role" value="<?php echo esc_attr( $role ); ?>" class="widefat" placeholder="Frontend Developer @ Acme">
+	</p>
+	<p>
+		<label for="_testimonial_role_ar"><strong><?php _e( 'Role / Company (Arabic)', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_testimonial_role_ar" name="_testimonial_role_ar" value="<?php echo esc_attr( $role_ar ); ?>" class="widefat" placeholder="مطور واجهات أمامية @ أكمة">
 	</p>
 	<p>
 		<label for="_testimonial_rating"><strong><?php _e( 'Rating (0-5)', 'edtech' ); ?></strong></label><br>
@@ -357,12 +419,17 @@ function edtech_render_testimonial_metabox( $post ) {
 
 function edtech_render_team_metabox( $post ) {
 	wp_nonce_field( 'edtech_save_team', 'edtech_team_nonce' );
-	$role   = get_post_meta( $post->ID, '_team_role', true );
-	$social = get_post_meta( $post->ID, '_team_social', true );
+	$role     = get_post_meta( $post->ID, '_team_role', true );
+	$role_ar  = get_post_meta( $post->ID, '_team_role_ar', true );
+	$social   = get_post_meta( $post->ID, '_team_social', true );
 	?>
 	<p>
 		<label for="_team_role"><strong><?php _e( 'Role / Title', 'edtech' ); ?></strong></label><br>
 		<input type="text" id="_team_role" name="_team_role" value="<?php echo esc_attr( $role ); ?>" class="widefat" placeholder="Founder & CEO">
+	</p>
+	<p>
+		<label for="_team_role_ar"><strong><?php _e( 'Role / Title (Arabic)', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_team_role_ar" name="_team_role_ar" value="<?php echo esc_attr( $role_ar ); ?>" class="widefat" placeholder="المؤسس والمدير التنفيذي">
 	</p>
 	<p>
 		<label for="_team_social"><strong><?php _e( 'Social / LinkedIn URL', 'edtech' ); ?></strong></label><br>
@@ -381,6 +448,9 @@ function edtech_save_testimonial_meta( $post_id ) {
 	if ( isset( $_POST['_testimonial_role'] ) ) {
 		update_post_meta( $post_id, '_testimonial_role', sanitize_text_field( wp_unslash( $_POST['_testimonial_role'] ) ) );
 	}
+	if ( isset( $_POST['_testimonial_role_ar'] ) ) {
+		update_post_meta( $post_id, '_testimonial_role_ar', sanitize_text_field( wp_unslash( $_POST['_testimonial_role_ar'] ) ) );
+	}
 	if ( isset( $_POST['_testimonial_rating'] ) ) {
 		update_post_meta( $post_id, '_testimonial_rating', max( 0, min( 5, (float) wp_unslash( $_POST['_testimonial_rating'] ) ) ) );
 	}
@@ -397,11 +467,149 @@ function edtech_save_team_meta( $post_id ) {
 	if ( isset( $_POST['_team_role'] ) ) {
 		update_post_meta( $post_id, '_team_role', sanitize_text_field( wp_unslash( $_POST['_team_role'] ) ) );
 	}
+	if ( isset( $_POST['_team_role_ar'] ) ) {
+		update_post_meta( $post_id, '_team_role_ar', sanitize_text_field( wp_unslash( $_POST['_team_role_ar'] ) ) );
+	}
 	if ( isset( $_POST['_team_social'] ) ) {
 		update_post_meta( $post_id, '_team_social', esc_url_raw( wp_unslash( $_POST['_team_social'] ) ) );
 	}
 }
 add_action( 'save_post_team', 'edtech_save_team_meta' );
+
+/**
+ * ===== Learning Path Metabox =====
+ * Stores the path-level metadata used by front-page.php, page-learning-paths.php,
+ * and single-learning_path.php: weeks count, courses count, badge label.
+ * The badge gets an Arabic counterpart so RTL can show a translated label.
+ */
+function edtech_register_learning_path_meta() {
+	foreach ( array( '_path_weeks', '_path_courses', '_path_badge', '_path_badge_ar' ) as $key ) {
+		register_post_meta( 'learning_path', $key, array(
+			'type'          => 'string',
+			'single'        => true,
+			'show_in_rest'  => true,
+			'sanitize_callback' => ( '_path_badge' === $key || '_path_badge_ar' === $key ) ? 'sanitize_text_field' : 'absint',
+			'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
+		) );
+	}
+}
+add_action( 'init', 'edtech_register_learning_path_meta', 25 );
+
+function edtech_add_learning_path_metabox() {
+	add_meta_box(
+		'edtech_path_details',
+		__( 'Learning Path Details (بيانات المسار)', 'edtech' ),
+		'edtech_render_learning_path_metabox',
+		'learning_path',
+		'normal',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'edtech_add_learning_path_metabox' );
+
+function edtech_render_learning_path_metabox( $post ) {
+	wp_nonce_field( 'edtech_save_learning_path', 'edtech_learning_path_nonce' );
+	$weeks     = get_post_meta( $post->ID, '_path_weeks', true );
+	$pcourses  = get_post_meta( $post->ID, '_path_courses', true );
+	$badge     = get_post_meta( $post->ID, '_path_badge', true );
+	$badge_ar  = get_post_meta( $post->ID, '_path_badge_ar', true );
+	?>
+	<p>
+		<label for="_path_weeks"><strong><?php _e( 'Total Weeks (عدد الأسابيع):', 'edtech' ); ?></strong></label><br>
+		<input type="number" min="1" id="_path_weeks" name="_path_weeks" value="<?php echo esc_attr( $weeks ); ?>" class="small-text" placeholder="4">
+	</p>
+	<p>
+		<label for="_path_courses"><strong><?php _e( 'Courses Count (عدد الدورات):', 'edtech' ); ?></strong></label><br>
+		<input type="number" min="1" id="_path_courses" name="_path_courses" value="<?php echo esc_attr( $pcourses ); ?>" class="small-text" placeholder="3">
+	</p>
+	<p>
+		<label for="_path_badge"><strong><?php _e( 'Badge Label', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_path_badge" name="_path_badge" value="<?php echo esc_attr( $badge ); ?>" class="regular-text" placeholder="Free">
+		<span class="description"><?php _e( 'Short label used for the badge class (Free, New, Pro...).', 'edtech' ); ?></span>
+	</p>
+	<p>
+		<label for="_path_badge_ar"><strong><?php _e( 'Badge Label (Arabic)', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_path_badge_ar" name="_path_badge_ar" value="<?php echo esc_attr( $badge_ar ); ?>" class="regular-text" placeholder="مجاني">
+	</p>
+	<?php
+}
+
+function edtech_save_learning_path_meta( $post_id ) {
+	if ( ! isset( $_POST['edtech_learning_path_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['edtech_learning_path_nonce'] ) ), 'edtech_save_learning_path' ) ) {
+		return;
+	}
+	if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+	if ( isset( $_POST['_path_weeks'] ) ) {
+		update_post_meta( $post_id, '_path_weeks', absint( wp_unslash( $_POST['_path_weeks'] ) ) );
+	}
+	if ( isset( $_POST['_path_courses'] ) ) {
+		update_post_meta( $post_id, '_path_courses', absint( wp_unslash( $_POST['_path_courses'] ) ) );
+	}
+	if ( isset( $_POST['_path_badge'] ) ) {
+		update_post_meta( $post_id, '_path_badge', sanitize_text_field( wp_unslash( $_POST['_path_badge'] ) ) );
+	}
+	if ( isset( $_POST['_path_badge_ar'] ) ) {
+		update_post_meta( $post_id, '_path_badge_ar', sanitize_text_field( wp_unslash( $_POST['_path_badge_ar'] ) ) );
+	}
+}
+add_action( 'save_post_learning_path', 'edtech_save_learning_path_meta' );
+
+/**
+ * ===== Universal Bilingual Metabox =====
+ * Adds Arabic title + Arabic content fields to every public post type
+ * (page, post, course, instructor, learning_path, faq, testimonial, team).
+ * The English title/content use the standard WP fields; these store _title_ar / _content_ar.
+ */
+function edtech_add_bilingual_metabox() {
+	$types = array( 'page', 'post', 'course', 'instructor', 'learning_path', 'faq', 'testimonial', 'team' );
+	foreach ( $types as $type ) {
+		add_meta_box(
+			'edtech_bilingual',
+			__( 'Arabic Content (المحتوى العربي)', 'edtech' ),
+			'edtech_render_bilingual_metabox',
+			$type,
+			'side',
+			'high'
+		);
+	}
+}
+add_action( 'add_meta_boxes', 'edtech_add_bilingual_metabox' );
+
+function edtech_render_bilingual_metabox( $post ) {
+	wp_nonce_field( 'edtech_save_bilingual', 'edtech_bilingual_nonce' );
+	$title_ar   = get_post_meta( $post->ID, '_title_ar', true );
+	$content_ar = get_post_meta( $post->ID, '_content_ar', true );
+	?>
+	<p>
+		<label for="edtech_title_ar"><strong><?php _e( 'Arabic Title (العنوان بالعربية)', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="edtech_title_ar" name="_title_ar" value="<?php echo esc_attr( $title_ar ); ?>" class="widefat" placeholder="العنوان العربي">
+	</p>
+	<p>
+		<label for="edtech_content_ar"><strong><?php _e( 'Arabic Content (المحتوى بالعربية)', 'edtech' ); ?></strong></label><br>
+		<textarea id="edtech_content_ar" name="_content_ar" rows="6" class="widefat" placeholder="المحتوى العربي"><?php echo esc_textarea( $content_ar ); ?></textarea>
+	</p>
+	<p class="description"><?php _e( 'Leave empty to use the English title/content for Arabic too.', 'edtech' ); ?></p>
+	<?php
+}
+
+function edtech_save_bilingual_meta( $post_id ) {
+	if ( ! isset( $_POST['edtech_bilingual_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['edtech_bilingual_nonce'] ) ), 'edtech_save_bilingual' ) ) {
+		return;
+	}
+	if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+	if ( isset( $_POST['_title_ar'] ) ) {
+		update_post_meta( $post_id, '_title_ar', sanitize_text_field( wp_unslash( $_POST['_title_ar'] ) ) );
+	}
+	if ( isset( $_POST['_content_ar'] ) ) {
+		update_post_meta( $post_id, '_content_ar', wp_kses_post( wp_unslash( $_POST['_content_ar'] ) ) );
+	}
+}
+add_action( 'save_post', 'edtech_save_bilingual_meta' );
+add_action( 'save_post_page', 'edtech_save_bilingual_meta' );
 
 function edtech_catalog_query( $query ) {
 	if ( is_admin() || ! $query->is_main_query() || ! is_post_type_archive( 'course' ) ) {
