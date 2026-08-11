@@ -89,7 +89,7 @@ get_header();
             $meta = edtech_get_course_meta( $c->ID );
             $status_label = 'draft' === $c->post_status ? ( is_rtl() ? 'مسودة' : 'Draft' ) : ( is_rtl() ? 'منشورة' : 'Published' );
           ?>
-            <div style="display:flex;gap:var(--space-md);align-items:center;padding:var(--space-sm);background:var(--color-bg-subtle);border-radius:var(--radius-md);">
+            <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);align-items:center;padding:var(--space-sm);background:var(--color-bg-subtle);border-radius:var(--radius-md);">
               <div style="flex-grow:1;">
                 <h4 style="font-size:14px;margin-bottom:2px;"><?php echo esc_html( $c->post_title ); ?></h4>
                 <span style="font-size:12px;color:var(--color-text-muted);"><?php echo esc_html( $status_label ); ?> · $<?php echo esc_html( $meta['price'] ); ?></span>

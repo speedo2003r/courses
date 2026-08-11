@@ -42,7 +42,7 @@ $catalog_link   = get_post_type_archive_link( 'course' );
 
       <!-- Left: Copy + Search -->
       <div class="reveal">
-        <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
           <span class="badge badge-bestseller">★ <?php echo esc_html( $hero_eyebrow ); ?></span>
           <span style="font-size:13px;color:var(--color-text-muted);"><?php echo esc_html( $hero_subtitle ); ?></span>
         </div>
@@ -238,7 +238,7 @@ $catalog_link   = get_post_type_archive_link( 'course' );
         </div>
 
         <div class="reveal">
-          <div class="grid grid-2" style="gap:var(--space-md);">
+          <div class="grid grid-2 stats-grid" style="gap:var(--space-md);">
             <div class="stat-card text-center"><div class="stat-value" data-target="<?php echo esc_attr( (int) $stat_students ); ?>">0</div><div class="stat-label"><?php is_rtl() ? _e('طالب نشط', 'edtech') : _e('Active Students', 'edtech'); ?></div></div>
             <div class="stat-card text-center"><div class="stat-value" data-target="<?php echo esc_attr( $stat_courses ); ?>">0</div><div class="stat-label"><?php is_rtl() ? _e('دورة متميزة', 'edtech') : _e('Premium Courses', 'edtech'); ?></div></div>
             <div class="stat-card text-center"><div class="stat-value" data-target="<?php echo esc_attr( $stat_instructors ); ?>">0</div><div class="stat-label"><?php is_rtl() ? _e('مدرب خبير', 'edtech') : _e('Expert Instructors', 'edtech'); ?></div></div>

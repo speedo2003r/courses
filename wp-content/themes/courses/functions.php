@@ -165,20 +165,20 @@ add_action( 'init', 'edtech_handle_auth_forms' );
  */
 function edtech_enqueue_scripts() {
 	wp_enqueue_style( 'edtech-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=Cairo:wght@400;600;700;800&family=Alexandria:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap', array(), null );
-	wp_enqueue_style( 'edtech-tokens', get_template_directory_uri() . '/assets/css/tokens.css', array(), '1.0.0' );
-	wp_enqueue_style( 'edtech-main', get_template_directory_uri() . '/assets/css/main.css', array( 'edtech-tokens' ), '1.0.0' );
-	wp_enqueue_style( 'edtech-components', get_template_directory_uri() . '/assets/css/components.css', array( 'edtech-main' ), '1.0.0' );
-	wp_enqueue_style( 'edtech-style', get_stylesheet_uri(), array( 'edtech-components' ), '1.0.0' );
+	wp_enqueue_style( 'edtech-tokens', get_template_directory_uri() . '/assets/css/tokens.css', array(), '1.2.0' );
+	wp_enqueue_style( 'edtech-main', get_template_directory_uri() . '/assets/css/main.css', array( 'edtech-tokens' ), '1.2.0' );
+	wp_enqueue_style( 'edtech-components', get_template_directory_uri() . '/assets/css/components.css', array( 'edtech-main' ), '1.2.0' );
+	wp_enqueue_style( 'edtech-style', get_stylesheet_uri(), array( 'edtech-components' ), '1.2.0' );
 
 	if ( is_rtl() ) {
-		wp_enqueue_style( 'edtech-rtl', get_template_directory_uri() . '/rtl.css', array( 'edtech-style' ), '1.0.0' );
+		wp_enqueue_style( 'edtech-rtl', get_template_directory_uri() . '/rtl.css', array( 'edtech-style' ), '1.2.0' );
 	}
 
-	wp_enqueue_script( 'edtech-app', get_template_directory_uri() . '/assets/js/app.js', array(), '1.0.1', true );
-	wp_enqueue_script( 'edtech-audio', get_template_directory_uri() . '/assets/js/audio.js', array( 'edtech-app' ), '1.0.0', true );
-	wp_enqueue_script( 'edtech-player', get_template_directory_uri() . '/assets/js/player.js', array( 'edtech-app' ), '1.0.0', true );
-	wp_enqueue_script( 'edtech-filter', get_template_directory_uri() . '/assets/js/filter.js', array( 'edtech-app' ), '1.0.0', true );
-	wp_enqueue_script( 'edtech-search', get_template_directory_uri() . '/assets/js/search.js', array( 'edtech-app' ), '1.0.1', true );
+	wp_enqueue_script( 'edtech-app', get_template_directory_uri() . '/assets/js/app.js', array(), '1.2.0', true );
+	wp_enqueue_script( 'edtech-audio', get_template_directory_uri() . '/assets/js/audio.js', array( 'edtech-app' ), '1.2.0', true );
+	wp_enqueue_script( 'edtech-player', get_template_directory_uri() . '/assets/js/player.js', array( 'edtech-app' ), '1.2.0', true );
+	wp_enqueue_script( 'edtech-filter', get_template_directory_uri() . '/assets/js/filter.js', array( 'edtech-app' ), '1.2.0', true );
+	wp_enqueue_script( 'edtech-search', get_template_directory_uri() . '/assets/js/search.js', array( 'edtech-app' ), '1.2.0', true );
 
 	// Localize real course data so search.js no longer depends on a hardcoded array.
 	$search_courses = get_posts( array(

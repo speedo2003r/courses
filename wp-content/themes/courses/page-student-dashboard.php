@@ -187,7 +187,7 @@ $auth_msg     = isset( $_GET['auth_msg'] ) ? sanitize_text_field( $_GET['auth_ms
                   $mc_thumb = edtech_get_post_image( $mc->ID, 'medium', 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=300&auto=format&fit=crop&q=80' );
                   $mc_prog  = (int) get_user_meta( $current_user->ID, '_edtech_course_progress_' . $mc->ID, true );
                   ?>
-                  <div style="display:flex;gap:var(--space-md);align-items:center;padding:var(--space-sm);background:var(--color-bg-subtle);border-radius:var(--radius-md);">
+                  <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);align-items:center;padding:var(--space-sm);background:var(--color-bg-subtle);border-radius:var(--radius-md);">
                     <img src="<?php echo esc_url( $mc_thumb ); ?>" alt="" style="width:80px;height:55px;border-radius:var(--radius-sm);object-fit:cover;">
                     <div style="flex-grow:1;">
                       <h4 style="font-size:14px;margin-bottom:2px;"><?php echo esc_html( $mc->post_title ); ?></h4>

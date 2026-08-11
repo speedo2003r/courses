@@ -18,7 +18,7 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
 
 <main>
 <?php if ( $course ) : ?>
-<div style="background:var(--color-bg-dark);height:56px;display:flex;align-items:center;padding-inline:var(--space-lg);gap:var(--space-md);color:white;">
+<div style="background:var(--color-bg-dark);height:auto;display:flex;flex-wrap:wrap;align-items:center;padding-block:var(--space-sm);padding-inline:var(--space-lg);gap:var(--space-sm);color:white;">
   <a href="<?php echo esc_url( $dashboard_url ); ?>" style="color:rgba(255,255,255,0.7);font-size:13px;text-decoration:none;">← <?php is_rtl() ? _e('لوحة الطالب', 'edtech') : _e('Dashboard', 'edtech'); ?></a>
   <span style="font-size:14px;font-weight:600;"><?php echo esc_html( $course->post_title ); ?></span>
   <?php if ( is_user_logged_in() && edtech_user_is_enrolled( $course_id ) ) : ?>

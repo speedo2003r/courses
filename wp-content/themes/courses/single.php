@@ -176,7 +176,7 @@ $tags = get_the_tags();
 <!-- Related Articles Bottom Section -->
 <section class="section-padding-sm" style="background:var(--color-bg-subtle);border-top:1px solid var(--color-border);">
   <div class="container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-lg);">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:var(--space-lg);">
       <div>
         <h2 style="margin-bottom:4px;"><?php is_rtl() ? _e( 'مقالات قد تهمك', 'edtech' ) : _e( 'Related Articles', 'edtech' ); ?></h2>
         <p style="color:var(--color-text-muted);font-size:14px;margin:0;"><?php is_rtl() ? _e( 'واصل القراءة والتعلم مع مواضيع ذات صلة', 'edtech' ) : _e( 'Continue reading and exploring related topics', 'edtech' ); ?></p>

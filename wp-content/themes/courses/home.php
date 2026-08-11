@@ -99,7 +99,7 @@ get_header();
               </a>
             </div>
             <div class="card-body" style="display:flex;flex-direction:column;flex-grow:1;padding:var(--space-md);">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-xs);">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xs);margin-bottom:var(--space-xs);">
                 <span class="badge badge-free" style="font-size:11px;"><?php echo esc_html( $cat_name ); ?></span>
                 <span style="font-size:12px;color:var(--color-text-muted);"><?php echo esc_html( get_the_date() ); ?></span>
               </div>
@@ -109,7 +109,7 @@ get_header();
               <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:var(--space-md);flex-grow:1;">
                 <?php echo esc_html( wp_trim_words( get_the_excerpt(), 18 ) ); ?>
               </p>
-              <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--color-border);padding-top:var(--space-xs);margin-top:auto;">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xs);border-top:1px solid var(--color-border);padding-top:var(--space-xs);margin-top:auto;">
                 <span style="font-size:12px;color:var(--color-text-muted);font-weight:500;">👤 <?php the_author(); ?></span>
                 <a href="<?php the_permalink(); ?>" style="font-size:13px;font-weight:700;color:var(--color-accent);text-decoration:none;"><?php is_rtl() ? _e('اقرأ المزيد ←', 'edtech') : _e('Read More →', 'edtech'); ?></a>
               </div>

@@ -52,12 +52,12 @@ if ( ! $instructor_name ) {
       <?php endif; ?>
       <span><?php echo esc_html( $instructor_name ); ?></span> · <span><?php echo esc_html( $meta['lessons_count'] ); ?> <?php is_rtl() ? _e('درس', 'edtech') : _e('lessons', 'edtech'); ?></span> · <span><?php echo esc_html( $meta['duration'] ); ?></span>
     </div>
-    <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:8px;">
       <?php echo edtech_render_stars( $meta['rating'] ); // phpcs:ignore ?>
       <span style="font-size:13px;font-weight:600;color:var(--color-accent);"><?php echo esc_html( $meta['rating'] ); ?></span>
       <span style="font-size:12px;color:var(--color-text-muted);">(<?php echo esc_html( $meta['reviews_count'] ); ?>)</span>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--color-border-subtle);padding-top:10px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;border-top:1px solid var(--color-border-subtle);padding-top:10px;">
       <div>
         <span class="course-price">$<?php echo esc_html( $meta['price'] ); ?></span>
         <span class="course-price-orig">$<?php echo esc_html( $meta['price_orig'] ); ?></span>

@@ -215,16 +215,10 @@
     display: flex;
   }
 
-  /* Hide dashboard/enroll buttons from the top bar on mobile to save space.
-     They reappear inside the mobile menu panel. */
+  /* Hide all action buttons from the top bar on mobile.
+     They all reappear inside the mobile menu panel. */
   .nav-action-dashboard,
-  .nav-action-enroll {
-    display: none;
-  }
-}
-
-/* On very small phones, also hide the language switcher from the bar (it's in the panel too) */
-@media (max-width: 479px) {
+  .nav-action-enroll,
   .lang-switcher-btn {
     display: none;
   }
