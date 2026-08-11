@@ -56,8 +56,13 @@ class EdTech_Seeder {
 	/**
 	 * Seed WordPress Pages and assign Page Templates
 	 */
-	public static function seed_pages( $count = 13 ) {
+	public static function seed_pages( $count = 14 ) {
 		$pages = array(
+			array(
+				'title'    => 'Home / الصفحة الرئيسية',
+				'slug'     => 'home',
+				'template' => 'front-page.php',
+			),
 			array(
 				'title'    => 'Blog / المدونة',
 				'slug'     => 'blog',

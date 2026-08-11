@@ -38,14 +38,28 @@ get_header();
   <div class="container">
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-xl);">
       <?php
-      $instructors = array(
-        array( 'name' => is_rtl() ? 'م. طارق منصور' : 'Eng. Tariq Mansour', 'title' => is_rtl() ? 'مهندس Full-Stack أول' : 'Senior Full-Stack Architect', 'img' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/tariq-intro.mp3', 'stats' => '★ 4.9 · 1,240' ),
-        array( 'name' => is_rtl() ? 'سارة الراشد' : 'Sarah Al-Rashid', 'title' => is_rtl() ? 'مصممة UI/UX رائدة' : 'Lead UI/UX Designer', 'img' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/sarah-intro.mp3', 'stats' => '★ 4.8 · 890' ),
-        array( 'name' => is_rtl() ? 'د. عمر فاروق' : 'Dr. Omar Farooq', 'title' => is_rtl() ? 'خبير علم البيانات' : 'Data Science Specialist', 'img' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/omar-intro.mp3', 'stats' => '★ 4.9 · 2,100' ),
-        array( 'name' => is_rtl() ? 'ليلى حسن' : 'Layla Hassan', 'title' => is_rtl() ? 'استراتيجية النمو الرقمي' : 'Digital Growth Strategist', 'img' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/layla-intro.mp3', 'stats' => '★ 4.7 · 680' ),
-      );
-      foreach ( $instructors as $inst ) {
-        get_template_part( 'template-parts/content-instructor-card', null, $inst );
+      $instructor_posts = get_posts( array( 'post_type' => 'instructor', 'posts_per_page' => -1 ) );
+      if ( ! empty( $instructor_posts ) ) {
+        foreach ( $instructor_posts as $ip ) {
+          $inst = array(
+            'name'  => get_the_title( $ip->ID ),
+            'title' => get_post_meta( $ip->ID, '_instructor_title', true ) ?: ( is_rtl() ? 'مهندس خبير' : 'Senior Specialist' ),
+            'img'   => get_the_post_thumbnail_url( $ip->ID, 'medium' ) ?: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+            'audio' => get_post_meta( $ip->ID, '_instructor_audio_url', true ) ?: 'assets/media/audio/tariq-intro.mp3',
+            'stats' => '★ ' . ( get_post_meta( $ip->ID, '_instructor_rating', true ) ?: '4.9' ) . ' · ' . ( get_post_meta( $ip->ID, '_instructor_students', true ) ?: '1,240' ),
+          );
+          get_template_part( 'template-parts/content-instructor-card', null, $inst );
+        }
+      } else {
+        $instructors = array(
+          array( 'name' => is_rtl() ? 'م. طارق منصور' : 'Eng. Tariq Mansour', 'title' => is_rtl() ? 'مهندس Full-Stack أول' : 'Senior Full-Stack Architect', 'img' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/tariq-intro.mp3', 'stats' => '★ 4.9 · 1,240' ),
+          array( 'name' => is_rtl() ? 'سارة الراشد' : 'Sarah Al-Rashid', 'title' => is_rtl() ? 'مصممة UI/UX رائدة' : 'Lead UI/UX Designer', 'img' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/sarah-intro.mp3', 'stats' => '★ 4.8 · 890' ),
+          array( 'name' => is_rtl() ? 'د. عمر فاروق' : 'Dr. Omar Farooq', 'title' => is_rtl() ? 'خبير علم البيانات' : 'Data Science Specialist', 'img' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/omar-intro.mp3', 'stats' => '★ 4.9 · 2,100' ),
+          array( 'name' => is_rtl() ? 'ليلى حسن' : 'Layla Hassan', 'title' => is_rtl() ? 'استراتيجية النمو الرقمي' : 'Digital Growth Strategist', 'img' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80', 'audio' => 'assets/media/audio/layla-intro.mp3', 'stats' => '★ 4.7 · 680' ),
+        );
+        foreach ( $instructors as $inst ) {
+          get_template_part( 'template-parts/content-instructor-card', null, $inst );
+        }
       }
       ?>
     </div>

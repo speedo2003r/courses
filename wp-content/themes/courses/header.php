@@ -37,7 +37,11 @@
       <?php else : ?>
         <a href="<?php echo esc_url( add_query_arg( 'lang', 'ar' ) ); ?>" class="btn btn-ghost lang-switcher-btn" data-lang="ar">العربية</a>
       <?php endif; ?>
-      <a href="<?php echo esc_url( home_url( '/student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
+      <?php if ( is_user_logged_in() ) : ?>
+        <a href="<?php echo esc_url( home_url( '/student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'لوحتي', 'edtech' ) : _e( 'Dashboard', 'edtech' ); ?></a>
+      <?php else : ?>
+        <a href="<?php echo esc_url( home_url( '/student-dashboard' ) ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'تسجيل الدخول', 'edtech' ) : _e( 'Sign In', 'edtech' ); ?></a>
+      <?php endif; ?>
       <a href="<?php echo esc_url( home_url( '/checkout' ) ); ?>" class="btn btn-primary" id="hero-enroll-cta"><?php is_rtl() ? _e( 'اشترك الآن', 'edtech' ) : _e( 'Enroll Now', 'edtech' ); ?></a>
     </div>
   </div>

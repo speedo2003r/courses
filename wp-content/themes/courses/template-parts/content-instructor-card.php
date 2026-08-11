@@ -19,7 +19,12 @@ $stats = isset($args['stats']) ? $args['stats'] : (is_rtl() ? '★ 4.9 · 1,240 
   </div>
   <p style="font-size:13px;color:var(--color-primary);font-weight:600;margin-bottom:4px;"><?php echo esc_html($title); ?></p>
   <p style="font-size:12px;color:var(--color-text-muted);margin-bottom:var(--space-md);"><?php echo esc_html($stats); ?></p>
-  <button class="audio-btn" data-audio="<?php echo esc_attr(get_template_directory_uri() . '/' . $audio); ?>" aria-label="<?php esc_attr_e('Play voice intro', 'edtech'); ?>">
+  <?php
+  $audio_src = ( strpos( $audio, 'http://' ) === 0 || strpos( $audio, 'https://' ) === 0 ) 
+    ? $audio 
+    : get_template_directory_uri() . '/' . ltrim( $audio, '/' );
+  ?>
+  <button class="audio-btn" data-audio="<?php echo esc_url( $audio_src ); ?>" aria-label="<?php esc_attr_e('Play voice intro', 'edtech'); ?>">
     <div class="audio-bars" aria-hidden="true">
       <div class="audio-bar"></div><div class="audio-bar"></div>
       <div class="audio-bar"></div><div class="audio-bar"></div>

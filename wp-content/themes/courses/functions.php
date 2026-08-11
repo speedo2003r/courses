@@ -41,35 +41,121 @@ function edtech_setup() {
 add_action( 'after_setup_theme', 'edtech_setup' );
 
 /**
- * Language Switcher Filter (Arabic <-> English)
+ * Language Switcher Handling (Arabic <-> English)
  */
-function edtech_setup_locale( $locale ) {
-	if ( isset( $_GET['lang'] ) ) {
+function edtech_init_language() {
+	$lang = '';
+	if ( isset( $_GET['lang'] ) && in_array( $_GET['lang'], array( 'ar', 'en' ), true ) ) {
 		$lang = sanitize_text_field( $_GET['lang'] );
-		if ( in_array( $lang, array( 'ar', 'en' ), true ) ) {
-			if ( ! headers_sent() ) {
-				setcookie( 'edtech_lang', $lang, time() + ( 30 * DAY_IN_SECONDS ), '/' );
-			}
-			return $lang === 'ar' ? 'ar' : 'en_US';
+		if ( ! headers_sent() ) {
+			setcookie( 'edtech_lang', $lang, time() + ( 30 * DAY_IN_SECONDS ), '/' );
+		}
+	} elseif ( isset( $_COOKIE['edtech_lang'] ) && in_array( $_COOKIE['edtech_lang'], array( 'ar', 'en' ), true ) ) {
+		$lang = $_COOKIE['edtech_lang'];
+	}
+
+	global $wp_locale;
+	if ( $lang === 'en' ) {
+		switch_to_locale( 'en_US' );
+		if ( isset( $wp_locale ) ) {
+			$wp_locale->text_direction = 'ltr';
+		}
+	} else {
+		switch_to_locale( 'ar' );
+		if ( isset( $wp_locale ) ) {
+			$wp_locale->text_direction = 'rtl';
 		}
 	}
-	if ( isset( $_COOKIE['edtech_lang'] ) ) {
-		return $_COOKIE['edtech_lang'] === 'ar' ? 'ar' : 'en_US';
-	}
-	return 'ar';
 }
-add_filter( 'locale', 'edtech_setup_locale' );
+edtech_init_language();
+add_action( 'init', 'edtech_init_language', 1 );
 
-function edtech_force_rtl( $is_rtl ) {
-	if ( isset( $_GET['lang'] ) ) {
-		return $_GET['lang'] === 'ar';
+/**
+ * Handle Login & Registration Form Submissions
+ */
+function edtech_handle_auth_forms() {
+	if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		return;
 	}
-	if ( isset( $_COOKIE['edtech_lang'] ) ) {
-		return $_COOKIE['edtech_lang'] === 'ar';
+
+	// Login Handler
+	if ( isset( $_POST['edtech_action'] ) && $_POST['edtech_action'] === 'login' ) {
+		if ( ! isset( $_POST['edtech_login_nonce'] ) || ! wp_verify_nonce( $_POST['edtech_login_nonce'], 'edtech_login_action' ) ) {
+			return;
+		}
+
+		$log = sanitize_text_field( $_POST['log'] );
+		$pwd = $_POST['pwd'];
+		$rem = ! empty( $_POST['rememberme'] );
+		$redirect = ! empty( $_POST['redirect_to'] ) ? esc_url_raw( $_POST['redirect_to'] ) : home_url( '/student-dashboard' );
+
+		$creds = array(
+			'user_login'    => $log,
+			'user_password' => $pwd,
+			'remember'      => $rem,
+		);
+
+		$user = wp_signon( $creds, is_ssl() );
+
+		if ( is_wp_error( $user ) ) {
+			$error_msg = urlencode( strip_tags( $user->get_error_message() ) );
+			wp_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'login' ), $redirect ) );
+			exit;
+		} else {
+			wp_redirect( $redirect );
+			exit;
+		}
 	}
-	return true; // Default to AR / RTL
+
+	// Register Handler
+	if ( isset( $_POST['edtech_action'] ) && $_POST['edtech_action'] === 'register' ) {
+		if ( ! isset( $_POST['edtech_register_nonce'] ) || ! wp_verify_nonce( $_POST['edtech_register_nonce'], 'edtech_register_action' ) ) {
+			return;
+		}
+
+		$username = sanitize_user( $_POST['username'] );
+		$email    = sanitize_email( $_POST['email'] );
+		$password = $_POST['password'];
+		$redirect = ! empty( $_POST['redirect_to'] ) ? esc_url_raw( $_POST['redirect_to'] ) : home_url( '/student-dashboard' );
+
+		if ( empty( $username ) || empty( $email ) || empty( $password ) ) {
+			$error_msg = urlencode( is_rtl() ? 'يرجى ملء جميع الحقول المطلوبة.' : 'Please fill in all required fields.' );
+			wp_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
+			exit;
+		}
+
+		if ( username_exists( $username ) ) {
+			$error_msg = urlencode( is_rtl() ? 'اسم المستخدم مستخدم بالفعل.' : 'Username already exists.' );
+			wp_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
+			exit;
+		}
+
+		if ( email_exists( $email ) ) {
+			$error_msg = urlencode( is_rtl() ? 'البريد الإلكتروني مستخدم بالفعل.' : 'Email address is already in use.' );
+			wp_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
+			exit;
+		}
+
+		$user_id = wp_create_user( $username, $password, $email );
+
+		if ( is_wp_error( $user_id ) ) {
+			$error_msg = urlencode( strip_tags( $user_id->get_error_message() ) );
+			wp_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
+			exit;
+		} else {
+			// Auto signon after creation
+			$creds = array(
+				'user_login'    => $username,
+				'user_password' => $password,
+				'remember'      => true,
+			);
+			wp_signon( $creds, is_ssl() );
+			wp_redirect( add_query_arg( 'auth_msg', urlencode( is_rtl() ? 'تم إنشاء الحساب وتسجيل الدخول بنجاح!' : 'Account created and logged in!' ), $redirect ) );
+			exit;
+		}
+	}
 }
-add_filter( 'is_rtl', 'edtech_force_rtl' );
+add_action( 'init', 'edtech_handle_auth_forms' );
 
 /**
  * Enqueue scripts and styles.
@@ -291,3 +377,51 @@ function edtech_get_course_meta( $post_id ) {
 		'instructor'    => get_post_meta( $post_id, '_course_instructor_name', true ) ?: 'Eng. Tariq Mansour',
 	);
 }
+
+/**
+ * Add Instructor Meta Box for Audio Intro URL & Job Title in WP Admin
+ */
+function edtech_add_instructor_metaboxes() {
+	add_meta_box(
+		'edtech_instructor_details',
+		__( 'بيانات المدرب والمقدمة الصوتية (Instructor Details & Audio Intro)', 'edtech' ),
+		'edtech_render_instructor_metabox',
+		'instructor',
+		'normal',
+		'high'
+	);
+}
+add_action( 'add_meta_boxes', 'edtech_add_instructor_metaboxes' );
+
+function edtech_render_instructor_metabox( $post ) {
+	wp_nonce_field( 'edtech_instructor_meta_nonce', 'instructor_meta_nonce' );
+	$audio_url = get_post_meta( $post->ID, '_instructor_audio_url', true );
+	$title     = get_post_meta( $post->ID, '_instructor_title', true );
+	?>
+	<p>
+		<label for="_instructor_title"><strong><?php _e( 'المسمى الوظيفي (Job Title):', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_instructor_title" name="_instructor_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" placeholder="Senior Full-Stack Architect">
+	</p>
+	<p>
+		<label for="_instructor_audio_url"><strong><?php _e( 'رابط المقدمة الصوتية (Voice Intro Audio URL):', 'edtech' ); ?></strong></label><br>
+		<input type="text" id="_instructor_audio_url" name="_instructor_audio_url" value="<?php echo esc_attr( $audio_url ); ?>" class="widefat" placeholder="assets/media/audio/tariq-intro.mp3">
+		<span class="description"><?php _e( 'أدخل مسار الملف الصوتي داخل القالب (مثل assets/media/audio/tariq-intro.mp3) أو رابط MP3 مباشر.', 'edtech' ); ?></span>
+	</p>
+	<?php
+}
+
+function edtech_save_instructor_meta( $post_id ) {
+	if ( ! isset( $_POST['instructor_meta_nonce'] ) || ! wp_verify_nonce( $_POST['instructor_meta_nonce'], 'edtech_instructor_meta_nonce' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( isset( $_POST['_instructor_audio_url'] ) ) {
+		update_post_meta( $post_id, '_instructor_audio_url', sanitize_text_field( $_POST['_instructor_audio_url'] ) );
+	}
+	if ( isset( $_POST['_instructor_title'] ) ) {
+		update_post_meta( $post_id, '_instructor_title', sanitize_text_field( $_POST['_instructor_title'] ) );
+	}
+}
+add_action( 'save_post_instructor', 'edtech_save_instructor_meta' );

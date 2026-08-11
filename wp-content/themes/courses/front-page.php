@@ -1,5 +1,6 @@
 <?php
 /**
+ * Template Name: Front Page / Home
  * The Front Page template (Home / Discovery Hub)
  *
  * Maps 1-to-1 to index.html and ar/index.html
