@@ -3,7 +3,7 @@
  * EdTech WordPress Data Seeder
  *
  * Populates realistic sample Courses, Instructors, Categories, Levels, Blog Posts, AND WordPress Pages.
- * All content is bilingual (English in standard fields, Arabic in _title_ar / _content_ar meta).
+ * Content is bilingual using WP Multilingual plugin - creates both English and Arabic translation posts.
  *
  * @package EdTech
  */
@@ -13,6 +13,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class EdTech_Seeder {
+
+	/**
+	 * Helper to link English and Arabic objects in WP Multilingual
+	 *
+	 * @param int    $en_id       English object ID.
+	 * @param int    $ar_id       Arabic object ID.
+	 * @param string $object_type 'post' or 'term'.
+	 */
+	public static function link_translations( $en_id, $ar_id, $object_type = 'post' ) {
+		if ( ! class_exists( '\\WPMultilingual\\TranslationManager' ) ) {
+			return;
+		}
+
+		$trans_mgr = \WPMultilingual\TranslationManager::get_instance();
+		$group_id  = null;
+
+		if ( $en_id ) {
+			$group_id = $trans_mgr->get_object_group_id( $en_id, $object_type );
+		}
+		if ( ! $group_id && $ar_id ) {
+			$group_id = $trans_mgr->get_object_group_id( $ar_id, $object_type );
+		}
+		if ( ! $group_id ) {
+			$group_id = $trans_mgr->create_group( $object_type );
+		}
+
+		if ( $en_id ) {
+			$trans_mgr->assign_language_and_group( $en_id, 'en', $group_id, $object_type, 'translated' );
+		}
+		if ( $ar_id ) {
+			$trans_mgr->assign_language_and_group( $ar_id, 'ar', $group_id, $object_type, 'translated' );
+		}
+	}
 
 	/**
 	 * Run full seeder with custom counter limits
@@ -30,9 +63,6 @@ class EdTech_Seeder {
 		flush_rewrite_rules();
 	}
 
-	/**
-	 * Seed Categories & Difficulty Levels
-	 */
 	public static function seed_categories_and_levels() {
 		$categories = array(
 			'Web Development'   => 'تطوير الويب',
@@ -43,11 +73,23 @@ class EdTech_Seeder {
 		);
 
 		foreach ( $categories as $en => $ar ) {
-			if ( ! term_exists( $en, 'course_category' ) ) {
-				wp_insert_term( $en, 'course_category', array(
-					'description' => $ar,
-				) );
+			$en_term = get_term_by( 'name', $en, 'course_category' );
+			if ( ! $en_term ) {
+				$en_res = wp_insert_term( $en, 'course_category', array( 'slug' => sanitize_title( $en ) ) );
+				$en_id  = ! is_wp_error( $en_res ) ? (int) $en_res['term_id'] : 0;
+			} else {
+				$en_id = (int) $en_term->term_id;
 			}
+
+			$ar_term = get_term_by( 'name', $ar, 'course_category' );
+			if ( ! $ar_term ) {
+				$ar_res = wp_insert_term( $ar, 'course_category', array( 'slug' => sanitize_title( $en ) . '-ar' ) );
+				$ar_id  = ! is_wp_error( $ar_res ) ? (int) $ar_res['term_id'] : 0;
+			} else {
+				$ar_id = (int) $ar_term->term_id;
+			}
+
+			self::link_translations( $en_id, $ar_id, 'term' );
 		}
 
 		$levels = array(
@@ -56,17 +98,25 @@ class EdTech_Seeder {
 			'Advanced'      => 'متقدم',
 		);
 		foreach ( $levels as $en => $ar ) {
-			if ( ! term_exists( $en, 'course_level' ) ) {
-				wp_insert_term( $en, 'course_level', array(
-					'description' => $ar,
-				) );
+			$en_term = get_term_by( 'name', $en, 'course_level' );
+			if ( ! $en_term ) {
+				$en_res = wp_insert_term( $en, 'course_level', array( 'slug' => sanitize_title( $en ) ) );
+				$en_id  = ! is_wp_error( $en_res ) ? (int) $en_res['term_id'] : 0;
+			} else {
+				$en_id = (int) $en_term->term_id;
 			}
+
+			$ar_term = get_term_by( 'name', $ar, 'course_level' );
+			if ( ! $ar_term ) {
+				$ar_res = wp_insert_term( $ar, 'course_level', array( 'slug' => sanitize_title( $en ) . '-ar' ) );
+				$ar_id  = ! is_wp_error( $ar_res ) ? (int) $ar_res['term_id'] : 0;
+			} else {
+				$ar_id = (int) $ar_term->term_id;
+			}
+
+			self::link_translations( $en_id, $ar_id, 'term' );
 		}
 	}
-
-	/**
-	 * Seed WordPress Pages and assign Page Templates
-	 */
 	public static function seed_pages( $count = 14 ) {
 		$pages = array(
 			array(
@@ -160,7 +210,7 @@ class EdTech_Seeder {
 			$existing = get_page_by_path( $item['slug'], OBJECT, 'page' );
 
 			if ( ! $existing ) {
-				$page_id = wp_insert_post( array(
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['title'],
 					'post_name'    => $item['slug'],
 					'post_status'  => 'publish',
@@ -168,20 +218,40 @@ class EdTech_Seeder {
 					'post_content' => '',
 				) );
 			} else {
-				$page_id = $existing->ID;
+				$en_id = $existing->ID;
 			}
 
+			if ( ! empty( $item['template'] ) && $en_id ) {
+				update_post_meta( $en_id, '_wp_page_template', $item['template'] );
+			}
+
+			$ar_id = 0;
 			if ( ! empty( $item['title_ar'] ) ) {
-				update_post_meta( $page_id, '_title_ar', $item['title_ar'] );
+				$existing_ar = get_page_by_path( $item['slug'] . '-ar', OBJECT, 'page' );
+				if ( ! $existing_ar ) {
+					$ar_id = wp_insert_post( array(
+						'post_title'   => $item['title_ar'],
+						'post_name'    => $item['slug'] . '-ar',
+						'post_status'  => 'publish',
+						'post_type'    => 'page',
+						'post_content' => '',
+					) );
+				} else {
+					$ar_id = $existing_ar->ID;
+				}
+
+				if ( ! empty( $item['template'] ) && $ar_id ) {
+					update_post_meta( $ar_id, '_wp_page_template', $item['template'] );
+				}
 			}
-			if ( ! empty( $item['template'] ) ) {
-				update_post_meta( $page_id, '_wp_page_template', $item['template'] );
-			}
+
+			self::link_translations( $en_id, $ar_id, 'post' );
+
 			if ( isset( $item['role'] ) && 'front' === $item['role'] ) {
-				$front_id = $page_id;
+				$front_id = $en_id;
 			}
 			if ( isset( $item['role'] ) && 'posts' === $item['role'] ) {
-				$posts_id = $page_id;
+				$posts_id = $en_id;
 			}
 		}
 
@@ -193,10 +263,6 @@ class EdTech_Seeder {
 			update_option( 'page_for_posts', $posts_id );
 		}
 	}
-
-	/**
-	 * Seed Instructors
-	 */
 	public static function seed_instructors( $count = 4 ) {
 		$data = array(
 			array(
@@ -249,39 +315,73 @@ class EdTech_Seeder {
 			),
 		);
 
-		$ids = array();
+		$ids   = array();
 		$limit = min( $count, count( $data ) );
 
 		for ( $i = 0; $i < $limit; $i++ ) {
 			$item = $data[$i];
-			$existing = get_page_by_title( $item['title'], OBJECT, 'instructor' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+
+			// English Instructor
+			$existing_en = get_posts( array(
+				'title'            => $item['title'],
+				'post_type'        => 'instructor',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['title'],
 					'post_content' => $item['content'],
 					'post_status'  => 'publish',
 					'post_type'    => 'instructor',
 				) );
-				update_post_meta( $post_id, '_title_ar', $item['title_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['content_ar'] );
-				update_post_meta( $post_id, '_instructor_title', $item['job'] );
-				update_post_meta( $post_id, '_instructor_title_ar', $item['job_ar'] );
-				update_post_meta( $post_id, '_instructor_rating', $item['rating'] );
-				update_post_meta( $post_id, '_instructor_students', $item['students'] );
-				update_post_meta( $post_id, '_instructor_audio_url', $item['audio'] );
-				update_post_meta( $post_id, '_thumbnail_url', $item['img'] );
-				$ids[] = $post_id;
 			} else {
-				$ids[] = $existing->ID;
+				$en_id = $existing_en[0]->ID;
 			}
+
+			update_post_meta( $en_id, '_instructor_title', $item['job'] );
+			update_post_meta( $en_id, '_instructor_rating', $item['rating'] );
+			update_post_meta( $en_id, '_instructor_students', $item['students'] );
+			update_post_meta( $en_id, '_instructor_audio_url', $item['audio'] );
+			update_post_meta( $en_id, '_thumbnail_url', $item['img'] );
+
+			// Arabic Instructor
+			$existing_ar = get_posts( array(
+				'title'            => $item['title_ar'],
+				'post_type'        => 'instructor',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'   => $item['title_ar'],
+					'post_content' => $item['content_ar'],
+					'post_status'  => 'publish',
+					'post_type'    => 'instructor',
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			update_post_meta( $ar_id, '_instructor_title', $item['job_ar'] );
+			update_post_meta( $ar_id, '_instructor_rating', $item['rating'] );
+			update_post_meta( $ar_id, '_instructor_students', $item['students'] );
+			update_post_meta( $ar_id, '_instructor_audio_url', $item['audio'] );
+			update_post_meta( $ar_id, '_thumbnail_url', $item['img'] );
+
+			self::link_translations( $en_id, $ar_id, 'post' );
+
+			$ids[] = array( 'en' => $en_id, 'ar' => $ar_id );
 		}
 
 		return $ids;
 	}
-
-	/**
-	 * Seed Courses
-	 */
 	public static function seed_courses( $count = 6, $instructor_ids = array() ) {
 		$courses_data = array(
 			array(
@@ -410,42 +510,94 @@ class EdTech_Seeder {
 
 		for ( $i = 0; $i < $limit; $i++ ) {
 			$item = $courses_data[$i];
-			$existing = get_page_by_title( $item['title'], OBJECT, 'course' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+
+			// English Course
+			$existing_en = get_posts( array(
+				'title'            => $item['title'],
+				'post_type'        => 'course',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['title'],
 					'post_content' => $item['content'],
 					'post_status'  => 'publish',
 					'post_type'    => 'course',
 				) );
+			} else {
+				$en_id = $existing_en[0]->ID;
+			}
 
-				update_post_meta( $post_id, '_title_ar', $item['title_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['content_ar'] );
-				update_post_meta( $post_id, '_course_price', $item['price'] );
-				update_post_meta( $post_id, '_course_price_orig', $item['orig'] );
-				update_post_meta( $post_id, '_course_badge', $item['badge'] );
-				update_post_meta( $post_id, '_course_duration', $item['duration'] );
-				update_post_meta( $post_id, '_course_lessons_count', $item['lessons'] );
-				update_post_meta( $post_id, '_course_rating', $item['rating'] );
-				update_post_meta( $post_id, '_course_reviews_count', $item['reviews'] );
-				update_post_meta( $post_id, '_course_syllabus', $item['syllabus'] );
-				update_post_meta( $post_id, '_course_syllabus_ar', $item['syllabus_ar'] );
-				update_post_meta( $post_id, '_course_outcomes', $item['outcomes'] );
-				update_post_meta( $post_id, '_course_outcomes_ar', $item['outcomes_ar'] );
-				update_post_meta( $post_id, '_course_skills', $item['skills'] );
-				update_post_meta( $post_id, '_course_skills_ar', $item['skills_ar'] );
+			update_post_meta( $en_id, '_course_price', $item['price'] );
+			update_post_meta( $en_id, '_course_price_orig', $item['orig'] );
+			update_post_meta( $en_id, '_course_badge', $item['badge'] );
+			update_post_meta( $en_id, '_course_duration', $item['duration'] );
+			update_post_meta( $en_id, '_course_lessons_count', $item['lessons'] );
+			update_post_meta( $en_id, '_course_rating', $item['rating'] );
+			update_post_meta( $en_id, '_course_reviews_count', $item['reviews'] );
+			update_post_meta( $en_id, '_course_syllabus', $item['syllabus'] );
+			update_post_meta( $en_id, '_course_outcomes', $item['outcomes'] );
+			update_post_meta( $en_id, '_course_skills', $item['skills'] );
 
-				$term = get_term_by( 'name', $item['cat'], 'course_category' );
-				if ( $term ) {
-					wp_set_post_terms( $post_id, array( $term->term_id ), 'course_category' );
+			$term_en = get_term_by( 'name', $item['cat'], 'course_category' );
+			if ( $term_en ) {
+				wp_set_post_terms( $en_id, array( $term_en->term_id ), 'course_category' );
+			}
+
+			// Arabic Course
+			$existing_ar = get_posts( array(
+				'title'            => $item['title_ar'],
+				'post_type'        => 'course',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'   => $item['title_ar'],
+					'post_content' => $item['content_ar'],
+					'post_status'  => 'publish',
+					'post_type'    => 'course',
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			update_post_meta( $ar_id, '_course_price', $item['price'] );
+			update_post_meta( $ar_id, '_course_price_orig', $item['orig'] );
+			update_post_meta( $ar_id, '_course_badge', $item['badge'] );
+			update_post_meta( $ar_id, '_course_duration', $item['duration'] );
+			update_post_meta( $ar_id, '_course_lessons_count', $item['lessons'] );
+			update_post_meta( $ar_id, '_course_rating', $item['rating'] );
+			update_post_meta( $ar_id, '_course_reviews_count', $item['reviews'] );
+			update_post_meta( $ar_id, '_course_syllabus', $item['syllabus_ar'] );
+			update_post_meta( $ar_id, '_course_outcomes', $item['outcomes_ar'] );
+			update_post_meta( $ar_id, '_course_skills', $item['skills_ar'] );
+
+			$term_ar = null;
+			if ( $term_en && class_exists( '\\WPMultilingual\\TranslationManager' ) ) {
+				$trans_mgr  = \WPMultilingual\TranslationManager::get_instance();
+				$ar_term_id = $trans_mgr->get_translation( $term_en->term_id, 'ar', 'term' );
+				if ( $ar_term_id ) {
+					$term_ar = get_term( $ar_term_id, 'course_category' );
 				}
 			}
+			if ( ! $term_ar ) {
+				$term_ar = $term_en;
+			}
+			if ( $term_ar && ! is_wp_error( $term_ar ) ) {
+				wp_set_post_terms( $ar_id, array( $term_ar->term_id ), 'course_category' );
+			}
+
+			self::link_translations( $en_id, $ar_id, 'post' );
 		}
 	}
-
-	/**
-	 * Seed Blog Posts
-	 */
 	public static function seed_blog_posts( $count = 3 ) {
 		$posts = array(
 			array(
@@ -472,23 +624,52 @@ class EdTech_Seeder {
 
 		for ( $i = 0; $i < $limit; $i++ ) {
 			$item = $posts[$i];
-			$existing = get_page_by_title( $item['title'], OBJECT, 'post' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+
+			// English Post
+			$existing_en = get_posts( array(
+				'title'            => $item['title'],
+				'post_type'        => 'post',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['title'],
 					'post_content' => $item['content'],
 					'post_status'  => 'publish',
 					'post_type'    => 'post',
 				) );
-				update_post_meta( $post_id, '_title_ar', $item['title_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['content_ar'] );
+			} else {
+				$en_id = $existing_en[0]->ID;
 			}
+
+			// Arabic Post
+			$existing_ar = get_posts( array(
+				'title'            => $item['title_ar'],
+				'post_type'        => 'post',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'   => $item['title_ar'],
+					'post_content' => $item['content_ar'],
+					'post_status'  => 'publish',
+					'post_type'    => 'post',
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			self::link_translations( $en_id, $ar_id, 'post' );
 		}
 	}
-
-	/**
-	 * Clear all seeded items
-	 */
 	public static function clear_all() {
 		$post_types = array( 'course', 'instructor', 'learning_path', 'faq', 'testimonial', 'team', 'post', 'page' );
 		$protect    = array_filter( array(
@@ -497,7 +678,13 @@ class EdTech_Seeder {
 		) );
 
 		foreach ( $post_types as $pt ) {
-			$posts = get_posts( array( 'post_type' => $pt, 'posts_per_page' => -1, 'post_status' => 'any' ) );
+			$posts = get_posts( array(
+				'post_type'        => $pt,
+				'posts_per_page'   => -1,
+				'post_status'      => 'any',
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
 			foreach ( $posts as $p ) {
 				if ( in_array( (int) $p->ID, $protect, true ) ) {
 					continue;
@@ -506,15 +693,38 @@ class EdTech_Seeder {
 			}
 		}
 
+		// Delete terms created by seeder
+		$taxonomies = array( 'course_category', 'course_level' );
+		foreach ( $taxonomies as $tax ) {
+			$terms = get_terms( array(
+				'taxonomy'         => $tax,
+				'hide_empty'       => false,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+			if ( ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $tax );
+				}
+			}
+		}
+
+		// Clean up any orphan rows in WP Multilingual tables
+		global $wpdb;
+		$table_trans  = $wpdb->prefix . 'wpm_translations';
+		$table_groups = $wpdb->prefix . 'wpm_translation_groups';
+
+		$wpdb->query( "DELETE t FROM " . $table_trans . " t LEFT JOIN " . $wpdb->posts . " p ON t.object_id = p.ID WHERE t.object_type = 'post' AND p.ID IS NULL" );
+		$wpdb->query( "DELETE t FROM " . $table_trans . " t LEFT JOIN " . $wpdb->terms . " tm ON t.object_id = tm.term_id WHERE t.object_type = 'term' AND tm.term_id IS NULL" );
+		$wpdb->query( "DELETE FROM " . $table_trans . " WHERE object_type NOT IN ('post', 'term')" );
+		$wpdb->query( "DELETE FROM " . $table_groups . " WHERE object_type NOT IN ('post', 'term')" );
+		$wpdb->query( "DELETE g FROM " . $table_groups . " g LEFT JOIN " . $table_trans . " t ON g.id = t.group_id WHERE t.id IS NULL" );
+
 		// Reset reading settings to defaults.
 		delete_option( 'page_on_front' );
 		delete_option( 'page_for_posts' );
 		update_option( 'show_on_front', 'posts' );
 	}
-
-	/**
-	 * Seed Learning Paths
-	 */
 	public static function seed_learning_paths() {
 		$paths = array(
 			array(
@@ -547,26 +757,57 @@ class EdTech_Seeder {
 		);
 
 		foreach ( $paths as $item ) {
-			$existing = get_page_by_title( $item['title'], OBJECT, 'learning_path' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+			$existing_en = get_posts( array(
+				'title'            => $item['title'],
+				'post_type'        => 'learning_path',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['title'],
 					'post_content' => $item['content'],
 					'post_status'  => 'publish',
 					'post_type'    => 'learning_path',
 				) );
-				update_post_meta( $post_id, '_title_ar', $item['title_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['content_ar'] );
-				update_post_meta( $post_id, '_path_weeks', $item['weeks'] );
-				update_post_meta( $post_id, '_path_courses', $item['courses'] );
-				update_post_meta( $post_id, '_path_badge', $item['badge'] );
+			} else {
+				$en_id = $existing_en[0]->ID;
 			}
+
+			update_post_meta( $en_id, '_path_weeks', $item['weeks'] );
+			update_post_meta( $en_id, '_path_courses', $item['courses'] );
+			update_post_meta( $en_id, '_path_badge', $item['badge'] );
+
+			$existing_ar = get_posts( array(
+				'title'            => $item['title_ar'],
+				'post_type'        => 'learning_path',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'   => $item['title_ar'],
+					'post_content' => $item['content_ar'],
+					'post_status'  => 'publish',
+					'post_type'    => 'learning_path',
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			update_post_meta( $ar_id, '_path_weeks', $item['weeks'] );
+			update_post_meta( $ar_id, '_path_courses', $item['courses'] );
+			update_post_meta( $ar_id, '_path_badge', $item['badge'] );
+
+			self::link_translations( $en_id, $ar_id, 'post' );
 		}
 	}
-
-	/**
-	 * Seed FAQ Items
-	 */
 	public static function seed_faq() {
 		$faqs = array(
 			array(
@@ -603,25 +844,52 @@ class EdTech_Seeder {
 
 		$order = 0;
 		foreach ( $faqs as $item ) {
-			$existing = get_page_by_title( $item['q'], OBJECT, 'faq' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+			$existing_en = get_posts( array(
+				'title'            => $item['q'],
+				'post_type'        => 'faq',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'    => $item['q'],
 					'post_content'  => $item['a'],
 					'post_status'   => 'publish',
 					'post_type'     => 'faq',
 					'menu_order'    => $order,
 				) );
-				update_post_meta( $post_id, '_title_ar', $item['q_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['a_ar'] );
+			} else {
+				$en_id = $existing_en[0]->ID;
 			}
+
+			$existing_ar = get_posts( array(
+				'title'            => $item['q_ar'],
+				'post_type'        => 'faq',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'    => $item['q_ar'],
+					'post_content'  => $item['a_ar'],
+					'post_status'   => 'publish',
+					'post_type'     => 'faq',
+					'menu_order'    => $order,
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			self::link_translations( $en_id, $ar_id, 'post' );
 			$order++;
 		}
 	}
-
-	/**
-	 * Seed Testimonials
-	 */
 	public static function seed_testimonials() {
 		$items = array(
 			array(
@@ -647,27 +915,57 @@ class EdTech_Seeder {
 		);
 
 		foreach ( $items as $item ) {
-			$existing = get_page_by_title( $item['name'], OBJECT, 'testimonial' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+			$existing_en = get_posts( array(
+				'title'            => $item['name'],
+				'post_type'        => 'testimonial',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['name'],
 					'post_content' => $item['quote'],
 					'post_status'  => 'publish',
 					'post_type'    => 'testimonial',
 				) );
-				update_post_meta( $post_id, '_title_ar', $item['name_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['quote_ar'] );
-				update_post_meta( $post_id, '_testimonial_role', $item['role'] );
-				update_post_meta( $post_id, '_testimonial_role_ar', $item['role_ar'] );
-				update_post_meta( $post_id, '_testimonial_rating', $item['rating'] );
-				update_post_meta( $post_id, '_thumbnail_url', $item['img'] );
+			} else {
+				$en_id = $existing_en[0]->ID;
 			}
+
+			update_post_meta( $en_id, '_testimonial_role', $item['role'] );
+			update_post_meta( $en_id, '_testimonial_rating', $item['rating'] );
+			update_post_meta( $en_id, '_thumbnail_url', $item['img'] );
+
+			$existing_ar = get_posts( array(
+				'title'            => $item['name_ar'],
+				'post_type'        => 'testimonial',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'   => $item['name_ar'],
+					'post_content' => $item['quote_ar'],
+					'post_status'  => 'publish',
+					'post_type'    => 'testimonial',
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			update_post_meta( $ar_id, '_testimonial_role', $item['role_ar'] );
+			update_post_meta( $ar_id, '_testimonial_rating', $item['rating'] );
+			update_post_meta( $ar_id, '_thumbnail_url', $item['img'] );
+
+			self::link_translations( $en_id, $ar_id, 'post' );
 		}
 	}
-
-	/**
-	 * Seed Team Members
-	 */
 	public static function seed_team() {
 		$members = array(
 			array(
@@ -693,21 +991,55 @@ class EdTech_Seeder {
 		);
 
 		foreach ( $members as $item ) {
-			$existing = get_page_by_title( $item['name'], OBJECT, 'team' );
-			if ( ! $existing ) {
-				$post_id = wp_insert_post( array(
+			$existing_en = get_posts( array(
+				'title'            => $item['name'],
+				'post_type'        => 'team',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_en ) ) {
+				$en_id = wp_insert_post( array(
 					'post_title'   => $item['name'],
 					'post_content' => $item['content'],
 					'post_status'  => 'publish',
 					'post_type'    => 'team',
 				) );
-				update_post_meta( $post_id, '_title_ar', $item['name_ar'] );
-				update_post_meta( $post_id, '_content_ar', $item['content_ar'] );
-				update_post_meta( $post_id, '_team_role', $item['role'] );
-				update_post_meta( $post_id, '_team_role_ar', $item['role_ar'] );
-				update_post_meta( $post_id, '_team_social', $item['social'] );
-				update_post_meta( $post_id, '_thumbnail_url', $item['img'] );
+			} else {
+				$en_id = $existing_en[0]->ID;
 			}
+
+			update_post_meta( $en_id, '_team_role', $item['role'] );
+			update_post_meta( $en_id, '_team_social', $item['social'] );
+			update_post_meta( $en_id, '_thumbnail_url', $item['img'] );
+
+			$existing_ar = get_posts( array(
+				'title'            => $item['name_ar'],
+				'post_type'        => 'team',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'suppress_filters' => true,
+				'lang'             => 'all',
+			) );
+
+			if ( empty( $existing_ar ) ) {
+				$ar_id = wp_insert_post( array(
+					'post_title'   => $item['name_ar'],
+					'post_content' => $item['content_ar'],
+					'post_status'  => 'publish',
+					'post_type'    => 'team',
+				) );
+			} else {
+				$ar_id = $existing_ar[0]->ID;
+			}
+
+			update_post_meta( $ar_id, '_team_role', $item['role_ar'] );
+			update_post_meta( $ar_id, '_team_social', $item['social'] );
+			update_post_meta( $ar_id, '_thumbnail_url', $item['img'] );
+
+			self::link_translations( $en_id, $ar_id, 'post' );
 		}
 	}
 }
