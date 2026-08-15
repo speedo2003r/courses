@@ -41,8 +41,8 @@ get_header();
     else :
       ?>
       <div class="card" style="padding:var(--space-xl);text-align:center;">
-        <h2><?php is_rtl() ? _e('لم يتم العثور على محتوى', 'edtech') : _e('No Content Found', 'edtech'); ?></h2>
-        <p><?php is_rtl() ? _e('يبدو أنه لا يوجد محتوى يعرض هنا.', 'edtech') : _e('It seems we cannot find what you are looking for.', 'edtech'); ?></p>
+        <h2><?php wpm_is_rtl() ? _e('لم يتم العثور على محتوى', 'edtech') : _e('No Content Found', 'edtech'); ?></h2>
+        <p><?php wpm_is_rtl() ? _e('يبدو أنه لا يوجد محتوى يعرض هنا.', 'edtech') : _e('It seems we cannot find what you are looking for.', 'edtech'); ?></p>
       </div>
       <?php
     endif;

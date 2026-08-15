@@ -16,7 +16,7 @@ $author_name = get_the_author();
 $author_avatar = get_avatar_url( $author_id, array( 'size' => 96 ) );
 $post_date  = get_the_date();
 $categories = get_the_category();
-$category_name = ! empty( $categories ) ? $categories[0]->name : ( is_rtl() ? 'تطوير الويب' : 'Development' );
+$category_name = ! empty( $categories ) ? $categories[0]->name : ( wpm_is_rtl() ? 'تطوير الويب' : 'Development' );
 $blog_link  = get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog' );
 $catalog_link = get_post_type_archive_link( 'course' );
 
@@ -38,9 +38,9 @@ $tags = get_the_tags();
   <div class="container" style="position:relative;z-index:1;">
     <!-- Breadcrumb -->
     <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:var(--space-md);display:flex;align-items:center;gap:var(--space-xs);flex-wrap:wrap;">
-      <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e( 'الرئيسية', 'edtech' ) : _e( 'Home', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color:inherit;text-decoration:none;"><?php wpm_is_rtl() ? _e( 'الرئيسية', 'edtech' ) : _e( 'Home', 'edtech' ); ?></a>
       <span>&rsaquo;</span>
-      <a href="<?php echo esc_url( $blog_link ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e( 'المدونة والموارد', 'edtech' ) : _e( 'Blog & Resources', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( $blog_link ); ?>" style="color:inherit;text-decoration:none;"><?php wpm_is_rtl() ? _e( 'المدونة والموارد', 'edtech' ) : _e( 'Blog & Resources', 'edtech' ); ?></a>
       <span>&rsaquo;</span>
       <span style="color:var(--color-accent);"><?php echo esc_html( $category_name ); ?></span>
     </div>
@@ -60,7 +60,7 @@ $tags = get_the_tags();
       <span>•</span>
       <div>📅 <?php echo esc_html( $post_date ); ?></div>
       <span>•</span>
-      <div>⏱️ <?php /* translators: %d: minutes */ printf( esc_html( is_rtl() ? 'قراءة %d دقيقة' : '%d min read' ), (int) $read_minutes ); ?></div>
+      <div>⏱️ <?php /* translators: %d: minutes */ printf( esc_html( wpm_is_rtl() ? 'قراءة %d دقيقة' : '%d min read' ), (int) $read_minutes ); ?></div>
     </div>
   </div>
 </section>
@@ -101,7 +101,7 @@ $tags = get_the_tags();
         <hr style="margin-block:var(--space-xl);border:0;border-top:1px solid var(--color-border);">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-md);">
           <div style="display:flex;align-items:center;gap:var(--space-xs);flex-wrap:wrap;">
-            <span style="font-weight:700;font-size:14px;"><?php is_rtl() ? _e( 'الوسوم:', 'edtech' ) : _e( 'Tags:', 'edtech' ); ?></span>
+            <span style="font-weight:700;font-size:14px;"><?php wpm_is_rtl() ? _e( 'الوسوم:', 'edtech' ) : _e( 'Tags:', 'edtech' ); ?></span>
             <span class="chip"><?php echo esc_html( $category_name ); ?></span>
             <?php if ( $tags ) : foreach ( $tags as $tag ) : ?>
               <a href="<?php echo esc_url( get_tag_link( $tag ) ); ?>" class="chip" style="text-decoration:none;"><?php echo esc_html( $tag->name ); ?></a>
@@ -109,8 +109,8 @@ $tags = get_the_tags();
           </div>
 
           <div style="display:flex;align-items:center;gap:var(--space-xs);">
-            <span style="font-size:13px;color:var(--color-text-muted);"><?php is_rtl() ? _e( 'مشاركة:', 'edtech' ) : _e( 'Share:', 'edtech' ); ?></span>
-            <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="navigator.clipboard.writeText(window.location.href);alert('<?php is_rtl() ? _e( 'تم نسخ الرابط!', 'edtech' ) : _e( 'Link copied!', 'edtech' ); ?>');">🔗 <?php is_rtl() ? _e( 'نسخ الرابط', 'edtech' ) : _e( 'Copy Link', 'edtech' ); ?></button>
+            <span style="font-size:13px;color:var(--color-text-muted);"><?php wpm_is_rtl() ? _e( 'مشاركة:', 'edtech' ) : _e( 'Share:', 'edtech' ); ?></span>
+            <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="navigator.clipboard.writeText(window.location.href);alert('<?php wpm_is_rtl() ? _e( 'تم نسخ الرابط!', 'edtech' ) : _e( 'Link copied!', 'edtech' ); ?>');">🔗 <?php wpm_is_rtl() ? _e( 'نسخ الرابط', 'edtech' ) : _e( 'Copy Link', 'edtech' ); ?></button>
           </div>
         </div>
 
@@ -118,9 +118,9 @@ $tags = get_the_tags();
         <div style="margin-top:var(--space-xl);padding:var(--space-lg);background:linear-gradient(145deg, var(--color-bg-subtle) 0%, var(--color-bg-card) 100%);border:1px solid var(--color-border);border-radius:var(--radius-md);display:flex;gap:var(--space-md);align-items:center;">
           <img src="<?php echo esc_url( $author_avatar ); ?>" alt="<?php echo esc_attr( $author_name ); ?>" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--color-accent);flex-shrink:0;">
           <div>
-            <span class="badge badge-free" style="font-size:11px;margin-bottom:4px;"><?php is_rtl() ? _e( 'كاتب الخبير', 'edtech' ) : _e( 'Expert Author', 'edtech' ); ?></span>
+            <span class="badge badge-free" style="font-size:11px;margin-bottom:4px;"><?php wpm_is_rtl() ? _e( 'كاتب الخبير', 'edtech' ) : _e( 'Expert Author', 'edtech' ); ?></span>
             <h4 style="margin-bottom:var(--space-xs);font-size:16px;"><?php echo esc_html( $author_name ); ?></h4>
-            <p style="font-size:13px;color:var(--color-text-muted);margin:0;"><?php is_rtl() ? _e( 'مطور متكامل وخبير تقني يشارك أحدث الأنماط المتقدمة وأفضل الممارسات البرمجية.', 'edtech' ) : _e( 'Full-stack architect & senior tech strategist sharing modern patterns & best practices.', 'edtech' ) ; ?></p>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:0;"><?php wpm_is_rtl() ? _e( 'مطور متكامل وخبير تقني يشارك أحدث الأنماط المتقدمة وأفضل الممارسات البرمجية.', 'edtech' ) : _e( 'Full-stack architect & senior tech strategist sharing modern patterns & best practices.', 'edtech' ) ; ?></p>
           </div>
         </div>
 
@@ -130,15 +130,15 @@ $tags = get_the_tags();
       <aside class="reveal">
         <!-- CTA Course Card -->
         <div class="card" style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);color:white;margin-bottom:var(--space-lg);">
-          <span class="badge badge-bestseller" style="margin-bottom:var(--space-sm);"><?php is_rtl() ? _e( 'دورة موصى بها', 'edtech' ) : _e( 'Recommended Course', 'edtech' ); ?></span>
-          <h3 style="color:white;font-size:18px;margin-bottom:var(--space-sm);"><?php is_rtl() ? _e( 'احترف Full-Stack React 19 & Node.js', 'edtech' ) : _e( 'Master Full-Stack React 19 & Node.js', 'edtech' ); ?></h3>
-          <p style="color:rgba(255,255,255,0.8);font-size:13px;margin-bottom:var(--space-md);"><?php is_rtl() ? _e( 'انضم إلى أكثر من 12,000 طالب وطوّر تطبيقات حقيقية مع شهادة معتمدة.', 'edtech' ) : _e( 'Join 12,000+ students building production apps with verified certificate.', 'edtech' ); ?></p>
-          <a href="<?php echo esc_url( $catalog_link ); ?>" class="btn btn-primary" style="width:100%;text-align:center;"><?php is_rtl() ? _e( 'استكشف الدورة الان ←', 'edtech' ) : _e( 'Explore Course Now →', 'edtech' ); ?></a>
+          <span class="badge badge-bestseller" style="margin-bottom:var(--space-sm);"><?php wpm_is_rtl() ? _e( 'دورة موصى بها', 'edtech' ) : _e( 'Recommended Course', 'edtech' ); ?></span>
+          <h3 style="color:white;font-size:18px;margin-bottom:var(--space-sm);"><?php wpm_is_rtl() ? _e( 'احترف Full-Stack React 19 & Node.js', 'edtech' ) : _e( 'Master Full-Stack React 19 & Node.js', 'edtech' ); ?></h3>
+          <p style="color:rgba(255,255,255,0.8);font-size:13px;margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e( 'انضم إلى أكثر من 12,000 طالب وطوّر تطبيقات حقيقية مع شهادة معتمدة.', 'edtech' ) : _e( 'Join 12,000+ students building production apps with verified certificate.', 'edtech' ); ?></p>
+          <a href="<?php echo esc_url( $catalog_link ); ?>" class="btn btn-primary" style="width:100%;text-align:center;"><?php wpm_is_rtl() ? _e( 'استكشف الدورة الان ←', 'edtech' ) : _e( 'Explore Course Now →', 'edtech' ); ?></a>
         </div>
 
         <!-- Recent Blog Posts Sidebar List -->
         <div class="card">
-          <h4 style="margin-bottom:var(--space-md);border-bottom:1px solid var(--color-border);padding-bottom:var(--space-xs);"><?php is_rtl() ? _e( 'أحدث المقالات', 'edtech' ) : _e( 'Recent Articles', 'edtech' ); ?></h4>
+          <h4 style="margin-bottom:var(--space-md);border-bottom:1px solid var(--color-border);padding-bottom:var(--space-xs);"><?php wpm_is_rtl() ? _e( 'أحدث المقالات', 'edtech' ) : _e( 'Recent Articles', 'edtech' ); ?></h4>
           <div style="display:flex;flex-direction:column;gap:var(--space-md);">
             <?php
             $recent_posts = get_posts( array(
@@ -163,7 +163,7 @@ $tags = get_the_tags();
               endforeach;
             else :
               ?>
-              <p style="font-size:13px;color:var(--color-text-muted);"><?php is_rtl() ? _e( 'لا توجد مقالات أخرى حالياً.', 'edtech' ) : _e( 'No other articles currently.', 'edtech' ); ?></p>
+              <p style="font-size:13px;color:var(--color-text-muted);"><?php wpm_is_rtl() ? _e( 'لا توجد مقالات أخرى حالياً.', 'edtech' ) : _e( 'No other articles currently.', 'edtech' ); ?></p>
             <?php endif; ?>
           </div>
         </div>
@@ -178,10 +178,10 @@ $tags = get_the_tags();
   <div class="container">
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:var(--space-lg);">
       <div>
-        <h2 style="margin-bottom:4px;"><?php is_rtl() ? _e( 'مقالات قد تهمك', 'edtech' ) : _e( 'Related Articles', 'edtech' ); ?></h2>
-        <p style="color:var(--color-text-muted);font-size:14px;margin:0;"><?php is_rtl() ? _e( 'واصل القراءة والتعلم مع مواضيع ذات صلة', 'edtech' ) : _e( 'Continue reading and exploring related topics', 'edtech' ); ?></p>
+        <h2 style="margin-bottom:4px;"><?php wpm_is_rtl() ? _e( 'مقالات قد تهمك', 'edtech' ) : _e( 'Related Articles', 'edtech' ); ?></h2>
+        <p style="color:var(--color-text-muted);font-size:14px;margin:0;"><?php wpm_is_rtl() ? _e( 'واصل القراءة والتعلم مع مواضيع ذات صلة', 'edtech' ) : _e( 'Continue reading and exploring related topics', 'edtech' ); ?></p>
       </div>
-      <a href="<?php echo esc_url( $blog_link ); ?>" class="btn btn-secondary"><?php is_rtl() ? _e( 'عرض كل المقالات ←', 'edtech' ) : _e( 'View All Articles →', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( $blog_link ); ?>" class="btn btn-secondary"><?php wpm_is_rtl() ? _e( 'عرض كل المقالات ←', 'edtech' ) : _e( 'View All Articles →', 'edtech' ); ?></a>
     </div>
 
     <div class="grid grid-3">
@@ -200,7 +200,7 @@ $tags = get_the_tags();
               <img src="<?php echo esc_url( $rel_thumb ); ?>" alt="<?php echo esc_attr( get_the_title( $rel->ID ) ); ?>" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
             </div>
             <div class="card-body">
-              <span class="badge badge-free" style="margin-bottom:var(--space-xs);"><?php is_rtl() ? _e( 'مقالة تعليمية', 'edtech' ) : _e( 'Tutorial Article', 'edtech' ); ?></span>
+              <span class="badge badge-free" style="margin-bottom:var(--space-xs);"><?php wpm_is_rtl() ? _e( 'مقالة تعليمية', 'edtech' ) : _e( 'Tutorial Article', 'edtech' ); ?></span>
               <h3 style="font-size:16px;line-height:1.35;margin-bottom:var(--space-xs);">
                 <a href="<?php echo esc_url( get_permalink( $rel->ID ) ); ?>" style="color:inherit;text-decoration:none;"><?php echo esc_html( get_the_title( $rel->ID ) ); ?></a>
               </h3>

@@ -15,11 +15,11 @@ get_header();
 <section class="section-padding" style="background:linear-gradient(145deg,var(--color-bg-main) 0%,var(--color-bg-subtle) 100%);">
   <div class="container">
     <div class="reveal">
-      <h1 style="margin-bottom:var(--space-md);"><?php is_rtl() ? _e('مركز المعرفة والموارد التعليمية', 'edtech') : _e('Knowledge Hub & Educational Resources', 'edtech'); ?></h1>
+      <h1 style="margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e('مركز المعرفة والموارد التعليمية', 'edtech') : _e('Knowledge Hub & Educational Resources', 'edtech'); ?></h1>
 
       <!-- Category Filter Chips -->
       <div style="display:flex;gap:var(--space-xs);flex-wrap:wrap;margin-bottom:var(--space-lg);" id="blog-category-filters">
-        <button class="chip filter-chip active" data-category="all"><?php is_rtl() ? _e('جميع المواضيع', 'edtech') : _e('All Topics', 'edtech'); ?></button>
+        <button class="chip filter-chip active" data-category="all"><?php wpm_is_rtl() ? _e('جميع المواضيع', 'edtech') : _e('All Topics', 'edtech'); ?></button>
         <?php
         $blog_cats = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'exclude' => get_option( 'default_category' ) ) );
         foreach ( $blog_cats as $term ) :
@@ -55,10 +55,10 @@ get_header();
         </a>
       </div>
       <div style="padding:var(--space-xl);display:flex;flex-direction:column;justify-content:center;">
-        <span class="badge badge-new" style="align-self:flex-start;margin-bottom:var(--space-sm);"><?php is_rtl() ? _e('مميز', 'edtech') : _e('Featured', 'edtech'); ?><?php echo $feat_cat_name ? ' · ' . esc_html( $feat_cat_name ) : ''; ?></span>
+        <span class="badge badge-new" style="align-self:flex-start;margin-bottom:var(--space-sm);"><?php wpm_is_rtl() ? _e('مميز', 'edtech') : _e('Featured', 'edtech'); ?><?php echo $feat_cat_name ? ' · ' . esc_html( $feat_cat_name ) : ''; ?></span>
         <h2 style="margin-bottom:var(--space-md);"><a href="<?php echo esc_url( $feat_link ); ?>" style="color:inherit;text-decoration:none;"><?php echo esc_html( $feat_title ); ?></a></h2>
         <p style="color:var(--color-text-muted);margin-bottom:var(--space-md);font-size:14px;"><?php echo esc_html( wp_trim_words( $feat_excerpt, 20 ) ); ?></p>
-        <a href="<?php echo esc_url( $feat_link ); ?>" class="btn btn-primary" style="align-self:flex-start;"><?php is_rtl() ? _e('اقرأ المقال ←', 'edtech') : _e('Read Article →', 'edtech'); ?></a>
+        <a href="<?php echo esc_url( $feat_link ); ?>" class="btn btn-primary" style="align-self:flex-start;"><?php wpm_is_rtl() ? _e('اقرأ المقال ←', 'edtech') : _e('Read Article →', 'edtech'); ?></a>
       </div>
     </div>
     <?php endif; ?>
@@ -80,7 +80,7 @@ get_header();
         while ( $blog_query->have_posts() ) : $blog_query->the_post();
           $post_thumb = edtech_get_post_image( get_the_ID(), 'medium_large', 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80' );
           $post_cats  = get_the_category();
-          $cat_name   = ! empty( $post_cats ) ? $post_cats[0]->name : ( is_rtl() ? 'عام' : 'General' );
+          $cat_name   = ! empty( $post_cats ) ? $post_cats[0]->name : ( wpm_is_rtl() ? 'عام' : 'General' );
           $cat_slugs  = array();
           if ( ! empty( $post_cats ) ) {
             foreach ( $post_cats as $c ) {
@@ -111,7 +111,7 @@ get_header();
               </p>
               <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-xs);border-top:1px solid var(--color-border);padding-top:var(--space-xs);margin-top:auto;">
                 <span style="font-size:12px;color:var(--color-text-muted);font-weight:500;">👤 <?php the_author(); ?></span>
-                <a href="<?php the_permalink(); ?>" style="font-size:13px;font-weight:700;color:var(--color-accent);text-decoration:none;"><?php is_rtl() ? _e('اقرأ المزيد ←', 'edtech') : _e('Read More →', 'edtech'); ?></a>
+                <a href="<?php the_permalink(); ?>" style="font-size:13px;font-weight:700;color:var(--color-accent);text-decoration:none;"><?php wpm_is_rtl() ? _e('اقرأ المزيد ←', 'edtech') : _e('Read More →', 'edtech'); ?></a>
               </div>
             </div>
           </article>
@@ -120,7 +120,7 @@ get_header();
         wp_reset_postdata();
       else :
       ?>
-        <p><?php is_rtl() ? _e('لا توجد مقالات متوفرة حالياً.', 'edtech') : _e('No posts available currently.', 'edtech'); ?></p>
+        <p><?php wpm_is_rtl() ? _e('لا توجد مقالات متوفرة حالياً.', 'edtech') : _e('No posts available currently.', 'edtech'); ?></p>
       <?php endif; ?>
     </div>
   </div>

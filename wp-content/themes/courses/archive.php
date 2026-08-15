@@ -29,7 +29,7 @@ get_header();
         endwhile;
       else :
         ?>
-        <p><?php is_rtl() ? _e('لا توجد عناصر في هذا الأرشيف.', 'edtech') : _e('No posts found in this archive.', 'edtech'); ?></p>
+        <p><?php wpm_is_rtl() ? _e('لا توجد عناصر في هذا الأرشيف.', 'edtech') : _e('No posts found in this archive.', 'edtech'); ?></p>
         <?php
       endif;
       ?>

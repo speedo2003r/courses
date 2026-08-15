@@ -3,10 +3,10 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <h3><?php is_rtl() ? _e( 'منصة التعلم الرقمي', 'edtech' ) : _e( 'EdTech Platform', 'edtech' ); ?></h3>
+        <h3><?php wpm_is_rtl() ? _e( 'منصة التعلم الرقمي', 'edtech' ) : _e( 'EdTech Platform', 'edtech' ); ?></h3>
         <p>
           <?php $footer_text = edtech_get_site_setting( 'footer_text' );
-          echo wp_kses_post( $footer_text ? $footer_text : ( is_rtl()
+          echo wp_kses_post( $footer_text ? $footer_text : ( wpm_is_rtl()
             ? 'نمكّن المتعلمين العرب والعالميين من المهارات الرقمية العالية التأثير عبر تعليم قائم على المشاريع.'
             : 'Empowering Arabic & Global learners with high-impact digital skills through expert-led project-based education.' ) ); ?>
         </p>
@@ -31,7 +31,7 @@
         <?php endif; ?>
       </div>
       <div class="footer-col">
-        <h4><?php is_rtl() ? _e( 'روابط سريعة', 'edtech' ) : _e( 'Quick Links', 'edtech' ); ?></h4>
+        <h4><?php wpm_is_rtl() ? _e( 'روابط سريعة', 'edtech' ) : _e( 'Quick Links', 'edtech' ); ?></h4>
         <?php
         wp_nav_menu( array(
           'theme_location' => 'footer-quick',
@@ -43,7 +43,7 @@
         ?>
       </div>
       <div class="footer-col">
-        <h4><?php is_rtl() ? _e( 'دعم الطلاب', 'edtech' ) : _e( 'Student Support', 'edtech' ); ?></h4>
+        <h4><?php wpm_is_rtl() ? _e( 'دعم الطلاب', 'edtech' ) : _e( 'Student Support', 'edtech' ); ?></h4>
         <?php
         wp_nav_menu( array(
           'theme_location' => 'footer-support',
@@ -56,7 +56,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© <?php echo esc_html( date( 'Y' ) ); ?> <?php is_rtl() ? _e( 'منصة التعلم الرقمي. جميع الحقوق محفوظة.', 'edtech' ) : _e( 'EdTech Platform. All rights reserved.', 'edtech' ); ?></span>
+      <span>© <?php echo esc_html( date( 'Y' ) ); ?> <?php wpm_is_rtl() ? _e( 'منصة التعلم الرقمي. جميع الحقوق محفوظة.', 'edtech' ) : _e( 'EdTech Platform. All rights reserved.', 'edtech' ); ?></span>
       <?php
       $contact_email = edtech_get_site_setting( 'contact_email' );
       $contact_phone = edtech_get_site_setting( 'contact_phone' );
@@ -66,7 +66,7 @@
           <?php if ( $contact_phone ) : ?> · <?php echo esc_html( $contact_phone ); ?><?php endif; ?>
         </span>
       <?php endif; ?>
-      <?php if ( is_rtl() ) : ?>
+      <?php if ( wpm_is_rtl() ) : ?>
         <a href="<?php echo esc_url( add_query_arg( 'lang', 'en' ) ); ?>" class="btn btn-ghost" style="height:32px;font-size:13px;">English</a>
       <?php else : ?>
         <a href="<?php echo esc_url( add_query_arg( 'lang', 'ar' ) ); ?>" class="btn btn-ghost" style="height:32px;font-size:13px;">العربية</a>

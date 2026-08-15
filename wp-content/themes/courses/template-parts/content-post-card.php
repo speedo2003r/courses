@@ -8,7 +8,7 @@
 $post_id      = get_the_ID();
 $thumb        = edtech_get_post_image( $post_id, 'medium_large', 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80' );
 $categories   = get_the_category();
-$category_name= ! empty( $categories ) ? $categories[0]->name : ( is_rtl() ? 'تعليم' : 'Tutorial' );
+$category_name= ! empty( $categories ) ? $categories[0]->name : ( wpm_is_rtl() ? 'تعليم' : 'Tutorial' );
 ?>
 <article class="card course-card reveal">
   <div class="card-thumbnail" style="aspect-ratio:16/9;overflow:hidden;">
@@ -24,7 +24,7 @@ $category_name= ! empty( $categories ) ? $categories[0]->name : ( is_rtl() ? 'ت
     <p style="font-size:13px;color:var(--color-text-muted);"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 18 ) ); ?></p>
     <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--color-border-subtle);padding-top:10px;font-size:12px;color:var(--color-text-muted);">
       <span><?php echo esc_html( get_the_date() ); ?></span>
-      <a href="<?php the_permalink(); ?>" class="btn btn-primary btn-sm"><?php is_rtl() ? _e('اقرأ المقال', 'edtech') : _e('Read Article', 'edtech'); ?></a>
+      <a href="<?php the_permalink(); ?>" class="btn btn-primary btn-sm"><?php wpm_is_rtl() ? _e('اقرأ المقال', 'edtech') : _e('Read Article', 'edtech'); ?></a>
     </div>
   </div>
 </article>

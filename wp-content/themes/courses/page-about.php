@@ -17,10 +17,10 @@ get_header();
   <div class="container" style="position:relative;z-index:1;text-align:center;padding-block:var(--space-3xl);">
     <div class="reveal">
       <h1 style="color:white;font-size:var(--font-size-display);margin-bottom:var(--space-lg);">
-        <?php is_rtl() ? _e('بنينا المنصة التي تمنينا<br>وجودها عندما بدأنا', 'edtech') : _e('We Built the School We Wished<br>Existed When We Started', 'edtech'); ?>
+        <?php wpm_is_rtl() ? _e('بنينا المنصة التي تمنينا<br>وجودها عندما بدأنا', 'edtech') : _e('We Built the School We Wished<br>Existed When We Started', 'edtech'); ?>
       </h1>
       <p style="color:rgba(255,255,255,0.8);font-size:var(--font-size-body-lg);max-width:600px;margin-inline:auto;margin-bottom:var(--space-xl);">
-        <?php is_rtl() ? _e('انطلقنا من شعور بالاستياء من الدورات السطحية والشعارات الزائفة، لنبني تجربة تعليمية حقيقية وصادقة تركز كلياً على النتائج الوظيفية للمتعلم.', 'edtech') : _e('Frustrated by surface-level tutorials and marketing hype, we built a real, practitioner-led learning platform focused entirely on career outcomes.', 'edtech'); ?>
+        <?php wpm_is_rtl() ? _e('انطلقنا من شعور بالاستياء من الدورات السطحية والشعارات الزائفة، لنبني تجربة تعليمية حقيقية وصادقة تركز كلياً على النتائج الوظيفية للمتعلم.', 'edtech') : _e('Frustrated by surface-level tutorials and marketing hype, we built a real, practitioner-led learning platform focused entirely on career outcomes.', 'edtech'); ?>
       </p>
     </div>
   </div>
@@ -37,7 +37,7 @@ get_header();
 <section class="section-padding" style="background:var(--color-bg-subtle);">
   <div class="container">
     <div style="text-align:center;max-width:580px;margin-inline:auto;margin-bottom:var(--space-xl);" class="reveal">
-      <h2><?php is_rtl() ? _e('فريقنا', 'edtech') : _e('Our Team', 'edtech'); ?></h2>
+      <h2><?php wpm_is_rtl() ? _e('فريقنا', 'edtech') : _e('Our Team', 'edtech'); ?></h2>
     </div>
     <div class="grid grid-4 reveal">
       <?php
@@ -53,13 +53,13 @@ get_header();
             <h3 style="font-size:var(--font-size-h4);margin-bottom:var(--space-xs);"><?php echo esc_html( get_the_title() ); ?></h3>
             <p style="font-size:14px;color:var(--color-text-muted);"><?php echo esc_html( $role ); ?></p>
             <?php if ( $social ) : ?>
-              <a href="<?php echo esc_url( $social ); ?>" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:var(--color-primary);"><?php is_rtl() ? _e('تابع ←', 'edtech') : _e('Follow →', 'edtech'); ?></a>
+              <a href="<?php echo esc_url( $social ); ?>" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:var(--color-primary);"><?php wpm_is_rtl() ? _e('تابع ←', 'edtech') : _e('Follow →', 'edtech'); ?></a>
             <?php endif; ?>
           </div>
         <?php endwhile;
         wp_reset_postdata();
       else : ?>
-        <p style="color:var(--color-text-muted);text-align:center;grid-column:1/-1;"><?php is_rtl() ? _e('لا يوجد أعضاء فريق بعد.', 'edtech') : _e('No team members yet.', 'edtech'); ?></p>
+        <p style="color:var(--color-text-muted);text-align:center;grid-column:1/-1;"><?php wpm_is_rtl() ? _e('لا يوجد أعضاء فريق بعد.', 'edtech') : _e('No team members yet.', 'edtech'); ?></p>
       <?php endif; ?>
     </div>
   </div>

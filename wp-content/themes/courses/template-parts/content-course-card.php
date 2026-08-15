@@ -9,7 +9,7 @@ $post_id = get_the_ID();
 $meta = edtech_get_course_meta( $post_id );
 $thumb_url = edtech_get_post_image( $post_id, 'medium_large' );
 $categories = wp_get_post_terms( $post_id, 'course_category', array( 'fields' => 'all' ) );
-$category_name = ! empty( $categories ) ? $categories[0]->name : ( is_rtl() ? 'تطوير الويب' : 'Development' );
+$category_name = ! empty( $categories ) ? $categories[0]->name : ( wpm_is_rtl() ? 'تطوير الويب' : 'Development' );
 $category_slug = ! empty( $categories ) ? $categories[0]->slug : '';
 
 // Instructor avatar/name: prefer the course meta, fall back to the first instructor CPT.
@@ -31,7 +31,7 @@ if ( ! $instructor_avatar ) {
 	}
 }
 if ( ! $instructor_name ) {
-	$instructor_name = is_rtl() ? 'مدرب خبير' : 'Expert Instructor';
+	$instructor_name = wpm_is_rtl() ? 'مدرب خبير' : 'Expert Instructor';
 }
 ?>
 <article class="card course-card reveal" data-category="<?php echo esc_attr( $category_slug ); ?>" data-category-name="<?php echo esc_attr( $category_name ); ?>">
@@ -50,7 +50,7 @@ if ( ! $instructor_name ) {
       <?php if ( $instructor_avatar ) : ?>
         <img src="<?php echo esc_url( $instructor_avatar ); ?>" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
       <?php endif; ?>
-      <span><?php echo esc_html( $instructor_name ); ?></span> · <span><?php echo esc_html( $meta['lessons_count'] ); ?> <?php is_rtl() ? _e('درس', 'edtech') : _e('lessons', 'edtech'); ?></span> · <span><?php echo esc_html( $meta['duration'] ); ?></span>
+      <span><?php echo esc_html( $instructor_name ); ?></span> · <span><?php echo esc_html( $meta['lessons_count'] ); ?> <?php wpm_is_rtl() ? _e('درس', 'edtech') : _e('lessons', 'edtech'); ?></span> · <span><?php echo esc_html( $meta['duration'] ); ?></span>
     </div>
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:8px;">
       <?php echo edtech_render_stars( $meta['rating'] ); // phpcs:ignore ?>
@@ -62,7 +62,7 @@ if ( ! $instructor_name ) {
         <span class="course-price">$<?php echo esc_html( $meta['price'] ); ?></span>
         <span class="course-price-orig">$<?php echo esc_html( $meta['price_orig'] ); ?></span>
       </div>
-      <a href="<?php echo esc_url( edtech_get_checkout_url( $post_id ) ); ?>" class="btn btn-primary btn-sm"><?php is_rtl() ? _e( 'اشترك', 'edtech' ) : _e( 'Enroll', 'edtech' ); ?></a>
+      <a href="<?php echo esc_url( edtech_get_checkout_url( $post_id ) ); ?>" class="btn btn-primary btn-sm"><?php wpm_is_rtl() ? _e( 'اشترك', 'edtech' ) : _e( 'Enroll', 'edtech' ); ?></a>
     </div>
   </div>
 </article>

@@ -23,8 +23,8 @@ while ( have_posts() ) : the_post();
 	  <img src="<?php echo esc_url( $img ); ?>" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.25;" loading="eager">
 	  <div class="container" style="position:relative;z-index:1;padding-block:var(--space-3xl);">
 	    <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:var(--space-sm);">
-	      <a href="<?php echo esc_url( home_url('/') ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e('الرئيسية', 'edtech') : _e('Home', 'edtech'); ?></a> &rsaquo;
-	      <a href="<?php echo esc_url( $catalog ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e('الدورات', 'edtech') : _e('Courses', 'edtech'); ?></a> &rsaquo;
+	      <a href="<?php echo esc_url( home_url('/') ); ?>" style="color:inherit;text-decoration:none;"><?php wpm_is_rtl() ? _e('الرئيسية', 'edtech') : _e('Home', 'edtech'); ?></a> &rsaquo;
+	      <a href="<?php echo esc_url( $catalog ); ?>" style="color:inherit;text-decoration:none;"><?php wpm_is_rtl() ? _e('الدورات', 'edtech') : _e('Courses', 'edtech'); ?></a> &rsaquo;
 	      <?php the_title(); ?>
 	    </p>
 	    <h1 style="color:white;font-size:var(--font-size-h1);max-width:680px;margin-bottom:var(--space-md);"><?php the_title(); ?></h1>
@@ -36,7 +36,7 @@ while ( have_posts() ) : the_post();
 	      <div style="display:flex;align-items:center;gap:4px;">
 	        <span class="stars">★★★★★</span>
 	        <span style="color:white;font-weight:700;"><?php echo esc_html( $meta['rating'] ); ?></span>
-	        <span style="color:rgba(255,255,255,0.6);font-size:13px;">(<?php echo esc_html( $meta['reviews_count'] ); ?> <?php is_rtl() ? _e('تقييم', 'edtech') : _e('ratings', 'edtech'); ?>)</span>
+	        <span style="color:rgba(255,255,255,0.6);font-size:13px;">(<?php echo esc_html( $meta['reviews_count'] ); ?> <?php wpm_is_rtl() ? _e('تقييم', 'edtech') : _e('ratings', 'edtech'); ?>)</span>
 	      </div>
 	      <?php if ( $meta['instructor'] ) : ?>
 	        <span style="color:rgba(255,255,255,0.6);font-size:13px;"><?php echo esc_html( $meta['instructor'] ); ?></span>
@@ -55,7 +55,7 @@ while ( have_posts() ) : the_post();
 	        <!-- Description -->
 	        <?php if ( get_the_content() ) : ?>
 	        <div class="card reveal" style="margin-bottom:var(--space-lg);">
-	          <h2 style="margin-bottom:var(--space-md);"><?php is_rtl() ? _e('عن الدورة', 'edtech') : _e('About this Course', 'edtech'); ?></h2>
+	          <h2 style="margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e('عن الدورة', 'edtech') : _e('About this Course', 'edtech'); ?></h2>
 	          <div class="entry-content" style="line-height:1.75;"><?php the_content(); ?></div>
 	        </div>
 	        <?php endif; ?>
@@ -63,10 +63,10 @@ while ( have_posts() ) : the_post();
 	        <!-- Outcomes -->
 	        <?php if ( ! empty( $meta['skills'] ) || ! empty( $meta['outcomes'] ) ) : ?>
 	        <div class="card reveal" style="margin-bottom:var(--space-lg);">
-	          <h2 style="margin-bottom:var(--space-md);"><?php is_rtl() ? _e('ماذا ستبني وتكتسب؟', 'edtech') : _e('What You Will Build & Gain', 'edtech'); ?></h2>
+	          <h2 style="margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e('ماذا ستبني وتكتسب؟', 'edtech') : _e('What You Will Build & Gain', 'edtech'); ?></h2>
 	          <div class="tabs">
-	            <?php if ( ! empty( $meta['skills'] ) ) : ?><button class="tab-trigger active" data-panel="outcomes-skills"><?php is_rtl() ? _e('المهارات المكتسبة', 'edtech') : _e('Skills Gained', 'edtech'); ?></button><?php endif; ?>
-	            <?php if ( ! empty( $meta['outcomes'] ) ) : ?><button class="tab-trigger" data-panel="outcomes-project" <?php echo empty( $meta['skills'] ) ? 'active' : ''; ?>><?php is_rtl() ? _e('معرض المشاريع', 'edtech') : _e('Project Showcase', 'edtech'); ?></button><?php endif; ?>
+	            <?php if ( ! empty( $meta['skills'] ) ) : ?><button class="tab-trigger active" data-panel="outcomes-skills"><?php wpm_is_rtl() ? _e('المهارات المكتسبة', 'edtech') : _e('Skills Gained', 'edtech'); ?></button><?php endif; ?>
+	            <?php if ( ! empty( $meta['outcomes'] ) ) : ?><button class="tab-trigger" data-panel="outcomes-project" <?php echo empty( $meta['skills'] ) ? 'active' : ''; ?>><?php wpm_is_rtl() ? _e('معرض المشاريع', 'edtech') : _e('Project Showcase', 'edtech'); ?></button><?php endif; ?>
 	          </div>
 	          <div data-tabs-container>
 	            <?php if ( ! empty( $meta['skills'] ) ) : ?>
@@ -85,18 +85,18 @@ while ( have_posts() ) : the_post();
 
 	        <!-- Syllabus -->
 	        <div class="reveal" style="margin-bottom:var(--space-lg);">
-	          <h2 style="margin-bottom:var(--space-md);"><?php is_rtl() ? _e('منهج الدورة', 'edtech') : _e('Course Syllabus', 'edtech'); ?></h2>
+	          <h2 style="margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e('منهج الدورة', 'edtech') : _e('Course Syllabus', 'edtech'); ?></h2>
 	          <?php if ( ! empty( $meta['syllabus'] ) ) : ?>
 	            <div class="accordion-group"><?php echo wp_kses_post( $meta['syllabus'] ); ?></div>
 	          <?php else : ?>
 	            <div class="accordion-group">
 	              <div class="accordion-item active">
 	                <button class="accordion-trigger" aria-expanded="true">
-	                  <span><?php is_rtl() ? _e('الوحدة 1: المقدمة', 'edtech') : _e('Module 1: Introduction', 'edtech'); ?></span>
+	                  <span><?php wpm_is_rtl() ? _e('الوحدة 1: المقدمة', 'edtech') : _e('Module 1: Introduction', 'edtech'); ?></span>
 	                  <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
 	                </button>
 	                <div class="accordion-body">
-	                  <p style="font-size:14px;color:var(--color-text-muted);"><?php is_rtl() ? _e('سيتم إضافة تفاصيل المنهج قريباً.', 'edtech') : _e('Syllabus details will be added soon.', 'edtech'); ?></p>
+	                  <p style="font-size:14px;color:var(--color-text-muted);"><?php wpm_is_rtl() ? _e('سيتم إضافة تفاصيل المنهج قريباً.', 'edtech') : _e('Syllabus details will be added soon.', 'edtech'); ?></p>
 	            </div>
 	              </div>
 	            </div>
@@ -111,16 +111,16 @@ while ( have_posts() ) : the_post();
 	            <span style="font-size:2rem;font-weight:800;color:var(--color-text-title);">$<?php echo esc_html( $meta['price'] ); ?></span>
 	            <span style="font-size:1.125rem;color:var(--color-text-muted);text-decoration:line-through;">$<?php echo esc_html( $meta['price_orig'] ); ?></span>
 	          </div>
-	          <a href="<?php echo esc_url( $checkout ); ?>" class="btn btn-primary btn-lg" style="width:100%;margin-bottom:var(--space-sm);"><?php is_rtl() ? _e('اشترك الآن', 'edtech') : _e('Enroll Now', 'edtech'); ?></a>
-	          <a href="<?php echo esc_url( edtech_page_url( 'free-masterclass' ) ); ?>" class="btn btn-secondary btn-lg" style="width:100%;"><?php is_rtl() ? _e('جرب درساً مجاناً', 'edtech') : _e('Try Free Lesson', 'edtech'); ?></a>
+	          <a href="<?php echo esc_url( $checkout ); ?>" class="btn btn-primary btn-lg" style="width:100%;margin-bottom:var(--space-sm);"><?php wpm_is_rtl() ? _e('اشترك الآن', 'edtech') : _e('Enroll Now', 'edtech'); ?></a>
+	          <a href="<?php echo esc_url( edtech_page_url( 'free-masterclass' ) ); ?>" class="btn btn-secondary btn-lg" style="width:100%;"><?php wpm_is_rtl() ? _e('جرب درساً مجاناً', 'edtech') : _e('Try Free Lesson', 'edtech'); ?></a>
 	          <?php
 		  $level_terms = wp_get_post_terms( $post_id, 'course_level', array( 'fields' => 'names' ) );
 		  $level_value = ( $level_terms && ! is_wp_error( $level_terms ) ) ? $level_terms[0] : '';
 		  $course_meta_items = array(
-	            is_rtl() ? 'المدة'       : 'Duration' => $meta['duration'],
-	            is_rtl() ? 'عدد الدروس' : 'Lessons'   => $meta['lessons_count'],
-	            is_rtl() ? 'المستوى'    : 'Level'     => $level_value,
-	            is_rtl() ? 'المدرب'      : 'Instructor'=> $meta['instructor'],
+	            wpm_is_rtl() ? 'المدة'       : 'Duration' => $meta['duration'],
+	            wpm_is_rtl() ? 'عدد الدروس' : 'Lessons'   => $meta['lessons_count'],
+	            wpm_is_rtl() ? 'المستوى'    : 'Level'     => $level_value,
+	            wpm_is_rtl() ? 'المدرب'      : 'Instructor'=> $meta['instructor'],
 		  );
 		  ?>
 	          <ul style="list-style:none;padding:0;margin:var(--space-md) 0 0;font-size:14px;color:var(--color-text-muted);display:flex;flex-direction:column;gap:8px;">

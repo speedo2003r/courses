@@ -13,6 +13,7 @@ require_once get_template_directory() . '/inc/seeder.php';
 require_once get_template_directory() . '/inc/content-model.php';
 require_once get_template_directory() . '/inc/forms.php';
 require_once get_template_directory() . '/inc/customizer.php';
+require_once get_template_directory() . '/inc/wpm-migration.php';
 
 /**
  * Theme Setup
@@ -176,19 +177,19 @@ function edtech_handle_auth_forms() {
 		$redirect = ! empty( $_POST['redirect_to'] ) ? esc_url_raw( $_POST['redirect_to'] ) : edtech_page_url( 'student-dashboard' );
 
 		if ( empty( $username ) || empty( $email ) || empty( $password ) ) {
-			$error_msg = urlencode( is_rtl() ? 'يرجى ملء جميع الحقول المطلوبة.' : 'Please fill in all required fields.' );
+			$error_msg = urlencode( wpm_is_rtl() ? 'يرجى ملء جميع الحقول المطلوبة.' : 'Please fill in all required fields.' );
 			wp_safe_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
 			exit;
 		}
 
 		if ( username_exists( $username ) ) {
-			$error_msg = urlencode( is_rtl() ? 'اسم المستخدم مستخدم بالفعل.' : 'Username already exists.' );
+			$error_msg = urlencode( wpm_is_rtl() ? 'اسم المستخدم مستخدم بالفعل.' : 'Username already exists.' );
 			wp_safe_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
 			exit;
 		}
 
 		if ( email_exists( $email ) ) {
-			$error_msg = urlencode( is_rtl() ? 'البريد الإلكتروني مستخدم بالفعل.' : 'Email address is already in use.' );
+			$error_msg = urlencode( wpm_is_rtl() ? 'البريد الإلكتروني مستخدم بالفعل.' : 'Email address is already in use.' );
 			wp_safe_redirect( add_query_arg( array( 'auth_err' => $error_msg, 'tab' => 'register' ), $redirect ) );
 			exit;
 		}
@@ -207,7 +208,7 @@ function edtech_handle_auth_forms() {
 				'remember'      => true,
 			);
 			wp_signon( $creds, is_ssl() );
-			wp_safe_redirect( add_query_arg( 'auth_msg', urlencode( is_rtl() ? 'تم إنشاء الحساب وتسجيل الدخول بنجاح!' : 'Account created and logged in!' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( 'auth_msg', urlencode( wpm_is_rtl() ? 'تم إنشاء الحساب وتسجيل الدخول بنجاح!' : 'Account created and logged in!' ), $redirect ) );
 			exit;
 		}
 	}
@@ -224,7 +225,7 @@ function edtech_enqueue_scripts() {
 	wp_enqueue_style( 'edtech-components', get_template_directory_uri() . '/assets/css/components.css', array( 'edtech-main' ), '1.2.0' );
 	wp_enqueue_style( 'edtech-style', get_stylesheet_uri(), array( 'edtech-components' ), '1.2.0' );
 
-	if ( is_rtl() ) {
+	if ( wpm_is_rtl() ) {
 		wp_enqueue_style( 'edtech-rtl', get_template_directory_uri() . '/rtl.css', array( 'edtech-style' ), '1.2.0' );
 	}
 
@@ -254,7 +255,7 @@ function edtech_enqueue_scripts() {
 	wp_localize_script( 'edtech-search', 'EDTECH_SEARCH', array(
 		'courses'  => $search_data,
 		'catalog'  => get_post_type_archive_link( 'course' ),
-		'is_rtl'   => is_rtl(),
+		'is_rtl'   => wpm_is_rtl(),
 	) );
 }
 add_action( 'wp_enqueue_scripts', 'edtech_enqueue_scripts' );
@@ -367,6 +368,53 @@ function edtech_register_custom_post_types() {
 	) );
 }
 add_action( 'init', 'edtech_register_custom_post_types' );
+
+/**
+ * Register Course CPT and taxonomies with WP Multilingual plugin.
+ */
+function edtech_register_translatable_content() {
+	if ( ! function_exists( 'wpm_get_settings' ) ) {
+		return;
+	}
+
+	$settings = wpm_get_settings();
+	$translatable_post_types = $settings['translatable_post_types'] ?? [];
+	$translatable_taxonomies = $settings['translatable_taxonomies'] ?? [];
+
+	// Add course CPT if not already registered
+	if ( ! in_array( 'course', $translatable_post_types, true ) ) {
+		$translatable_post_types[] = 'course';
+	}
+	if ( ! in_array( 'instructor', $translatable_post_types, true ) ) {
+		$translatable_post_types[] = 'instructor';
+	}
+	if ( ! in_array( 'learning_path', $translatable_post_types, true ) ) {
+		$translatable_post_types[] = 'learning_path';
+	}
+	if ( ! in_array( 'faq', $translatable_post_types, true ) ) {
+		$translatable_post_types[] = 'faq';
+	}
+	if ( ! in_array( 'testimonial', $translatable_post_types, true ) ) {
+		$translatable_post_types[] = 'testimonial';
+	}
+	if ( ! in_array( 'team', $translatable_post_types, true ) ) {
+		$translatable_post_types[] = 'team';
+	}
+
+	// Add course taxonomies
+	if ( ! in_array( 'course_category', $translatable_taxonomies, true ) ) {
+		$translatable_taxonomies[] = 'course_category';
+	}
+	if ( ! in_array( 'course_level', $translatable_taxonomies, true ) ) {
+		$translatable_taxonomies[] = 'course_level';
+	}
+
+	// Update settings
+	$settings['translatable_post_types'] = $translatable_post_types;
+	$settings['translatable_taxonomies'] = $translatable_taxonomies;
+	update_option( 'wpm_settings', $settings );
+}
+add_action( 'init', 'edtech_register_translatable_content', 20 );
 
 /**
  * Admin Menu: Seeder Control Panel
@@ -494,13 +542,13 @@ function edtech_render_stars( $rating = 4.9 ) {
 function edtech_nav_menu_fallback( $args = array() ) {
 	$menu_class = ! empty( $args['menu_class'] ) ? $args['menu_class'] : 'nav-links';
 	$items = array(
-		'catalog'         => array( is_rtl() ? 'الدورات' : 'Courses', get_post_type_archive_link( 'course' ) ),
-		'learning-paths'   => array( is_rtl() ? 'مسارات التعلم' : 'Learning Paths', edtech_page_url( 'learning-paths' ) ),
-		'instructors'      => array( is_rtl() ? 'المدربون' : 'Instructors', get_post_type_archive_link( 'instructor' ) ),
-		'free-masterclass' => array( is_rtl() ? 'ماستر كلاس مجاني' : 'Free Masterclass', edtech_page_url( 'free-masterclass' ) ),
-		'blog'             => array( is_rtl() ? 'المدونة' : 'Blog', get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog' ) ),
-		'about'            => array( is_rtl() ? 'من نحن' : 'About', edtech_page_url( 'about' ) ),
-		'faq'              => array( is_rtl() ? 'الدعم' : 'FAQ', edtech_page_url( 'faq' ) ),
+		'catalog'         => array( wpm_is_rtl() ? 'الدورات' : 'Courses', get_post_type_archive_link( 'course' ) ),
+		'learning-paths'   => array( wpm_is_rtl() ? 'مسارات التعلم' : 'Learning Paths', edtech_page_url( 'learning-paths' ) ),
+		'instructors'      => array( wpm_is_rtl() ? 'المدربون' : 'Instructors', get_post_type_archive_link( 'instructor' ) ),
+		'free-masterclass' => array( wpm_is_rtl() ? 'ماستر كلاس مجاني' : 'Free Masterclass', edtech_page_url( 'free-masterclass' ) ),
+		'blog'             => array( wpm_is_rtl() ? 'المدونة' : 'Blog', get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog' ) ),
+		'about'            => array( wpm_is_rtl() ? 'من نحن' : 'About', edtech_page_url( 'about' ) ),
+		'faq'              => array( wpm_is_rtl() ? 'الدعم' : 'FAQ', edtech_page_url( 'faq' ) ),
 	);
 	printf( '<ul class="%s" role="list">', esc_attr( $menu_class ) );
 	foreach ( $items as $slug => $data ) {
@@ -520,18 +568,18 @@ function edtech_nav_menu_fallback( $args = array() ) {
 function edtech_footer_menu_fallback( $args ) {
 	$sets = array(
 		'footer-quick'   => array(
-			array( is_rtl() ? 'كتالوج الدورات' : 'Courses Catalog', get_post_type_archive_link( 'course' ) ),
-			array( is_rtl() ? 'مسارات التعلم' : 'Learning Paths', edtech_page_url( 'learning-paths' ) ),
-			array( is_rtl() ? 'المدربون' : 'Instructors', get_post_type_archive_link( 'instructor' ) ),
-			array( is_rtl() ? 'المدونة والموارد' : 'Blog & Resources', get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog' ) ),
-			array( is_rtl() ? 'من نحن' : 'About Us', edtech_page_url( 'about' ) ),
+			array( wpm_is_rtl() ? 'كتالوج الدورات' : 'Courses Catalog', get_post_type_archive_link( 'course' ) ),
+			array( wpm_is_rtl() ? 'مسارات التعلم' : 'Learning Paths', edtech_page_url( 'learning-paths' ) ),
+			array( wpm_is_rtl() ? 'المدربون' : 'Instructors', get_post_type_archive_link( 'instructor' ) ),
+			array( wpm_is_rtl() ? 'المدونة والموارد' : 'Blog & Resources', get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog' ) ),
+			array( wpm_is_rtl() ? 'من نحن' : 'About Us', edtech_page_url( 'about' ) ),
 		),
 		'footer-support' => array(
-			array( is_rtl() ? 'الأسئلة الشائعة' : 'FAQ & Help Center', edtech_page_url( 'faq' ) ),
-			array( is_rtl() ? 'لوحة الطالب' : 'Student Dashboard', edtech_page_url( 'student-dashboard' ) ),
-			array( is_rtl() ? 'شهاداتي' : 'My Certificates', edtech_page_url( 'certificates' ) ),
-			array( is_rtl() ? 'إعدادات الحساب' : 'Account Settings', edtech_page_url( 'student-settings' ) ),
-			array( is_rtl() ? 'الدفع والتسجيل' : 'Checkout', edtech_page_url( 'checkout' ) ),
+			array( wpm_is_rtl() ? 'الأسئلة الشائعة' : 'FAQ & Help Center', edtech_page_url( 'faq' ) ),
+			array( wpm_is_rtl() ? 'لوحة الطالب' : 'Student Dashboard', edtech_page_url( 'student-dashboard' ) ),
+			array( wpm_is_rtl() ? 'شهاداتي' : 'My Certificates', edtech_page_url( 'certificates' ) ),
+			array( wpm_is_rtl() ? 'إعدادات الحساب' : 'Account Settings', edtech_page_url( 'student-settings' ) ),
+			array( wpm_is_rtl() ? 'الدفع والتسجيل' : 'Checkout', edtech_page_url( 'checkout' ) ),
 		),
 	);
 	$items = isset( $sets[ $args['theme_location'] ] ) ? $sets[ $args['theme_location'] ] : array();
@@ -560,15 +608,10 @@ function edtech_render_instructor_metabox( $post ) {
 	wp_nonce_field( 'edtech_instructor_meta_nonce', 'instructor_meta_nonce' );
 	$audio_url = get_post_meta( $post->ID, '_instructor_audio_url', true );
 	$title     = get_post_meta( $post->ID, '_instructor_title', true );
-	$title_ar  = get_post_meta( $post->ID, '_instructor_title_ar', true );
 	?>
 	<p>
 		<label for="_instructor_title"><strong><?php _e( 'المسمى الوظيفي (Job Title):', 'edtech' ); ?></strong></label><br>
 		<input type="text" id="_instructor_title" name="_instructor_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" placeholder="Senior Full-Stack Architect">
-	</p>
-	<p>
-		<label for="_instructor_title_ar"><strong><?php _e( 'المسمى الوظيفي بالعربية (Job Title - Arabic):', 'edtech' ); ?></strong></label><br>
-		<input type="text" id="_instructor_title_ar" name="_instructor_title_ar" value="<?php echo esc_attr( $title_ar ); ?>" class="widefat" placeholder="مهندس Full-Stack أول">
 	</p>
 	<p>
 		<label for="_instructor_audio_url"><strong><?php _e( 'رابط المقدمة الصوتية (Voice Intro Audio URL):', 'edtech' ); ?></strong></label><br>
@@ -590,9 +633,6 @@ function edtech_save_instructor_meta( $post_id ) {
 	}
 	if ( isset( $_POST['_instructor_title'] ) ) {
 		update_post_meta( $post_id, '_instructor_title', sanitize_text_field( $_POST['_instructor_title'] ) );
-	}
-	if ( isset( $_POST['_instructor_title_ar'] ) ) {
-		update_post_meta( $post_id, '_instructor_title_ar', sanitize_text_field( $_POST['_instructor_title_ar'] ) );
 	}
 }
 add_action( 'save_post_instructor', 'edtech_save_instructor_meta' );

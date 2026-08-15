@@ -22,7 +22,7 @@ foreach ( $all_paths as $p ) {
 if ( ! $total_weeks ) {
 	$total_weeks = 16;
 }
-$is_rtl = is_rtl();
+$is_rtl = wpm_is_rtl();
 ?>
 
 <main>
@@ -61,17 +61,17 @@ $is_rtl = is_rtl();
         ?>
         <div class="reveal" style="margin-bottom:var(--space-lg);">
           <h2><?php the_title(); ?></h2>
-          <p style="color:var(--color-text-muted);margin-top:var(--space-xs);"><?php echo esc_html( sprintf( '%s %s · %s', $pcourses, ( is_rtl() ? 'دورات' : 'Courses' ), ( $weeks ? $weeks . ' ' . ( is_rtl() ? 'أسابيع' : 'Weeks' ) : '' ) ) ); ?></p>
+          <p style="color:var(--color-text-muted);margin-top:var(--space-xs);"><?php echo esc_html( sprintf( '%s %s · %s', $pcourses, ( wpm_is_rtl() ? 'دورات' : 'Courses' ), ( $weeks ? $weeks . ' ' . ( wpm_is_rtl() ? 'أسابيع' : 'Weeks' ) : '' ) ) ); ?></p>
         </div>
         <div class="skill-tree reveal">
           <div class="skill-node">
             <div class="skill-node-card" style="display:flex;align-items:center;justify-content:space-between;">
               <div>
-                <span class="badge <?php echo esc_attr( $badge_class ); ?>" style="margin-bottom:4px;"><?php printf( esc_html( is_rtl() ? 'المرحلة %d' : 'Phase %d' ), $phase ); ?></span>
+                <span class="badge <?php echo esc_attr( $badge_class ); ?>" style="margin-bottom:4px;"><?php printf( esc_html( wpm_is_rtl() ? 'المرحلة %d' : 'Phase %d' ), $phase ); ?></span>
                 <h3 style="margin:0;font-size:var(--font-size-h4);"><?php the_title(); ?></h3>
-                <p style="font-size:13px;color:var(--color-text-muted);margin-top:4px;"><?php echo esc_html( sprintf( '%s %s · %s %s', $pcourses, ( is_rtl() ? 'دورات' : 'Courses' ), $weeks, ( is_rtl() ? 'أسابيع' : 'Weeks' ) ) ); ?></p>
+                <p style="font-size:13px;color:var(--color-text-muted);margin-top:4px;"><?php echo esc_html( sprintf( '%s %s · %s %s', $pcourses, ( wpm_is_rtl() ? 'دورات' : 'Courses' ), $weeks, ( wpm_is_rtl() ? 'أسابيع' : 'Weeks' ) ) ); ?></p>
               </div>
-              <a href="<?php echo esc_url( get_permalink() ); ?>" class="btn btn-secondary" style="flex-shrink:0;"><?php is_rtl() ? _e('ابدأ المرحلة ←', 'edtech') : _e('Start Phase →', 'edtech'); ?></a>
+              <a href="<?php echo esc_url( get_permalink() ); ?>" class="btn btn-secondary" style="flex-shrink:0;"><?php wpm_is_rtl() ? _e('ابدأ المرحلة ←', 'edtech') : _e('Start Phase →', 'edtech'); ?></a>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ $is_rtl = is_rtl();
       endwhile;
       wp_reset_postdata();
     else : ?>
-      <p style="color:var(--color-text-muted);text-align:center;"><?php is_rtl() ? _e('لا توجد مسارات تعلم بعد. أضفها من لوحة التحكم.', 'edtech') : _e('No learning paths yet. Add them from the admin.', 'edtech'); ?></p>
+      <p style="color:var(--color-text-muted);text-align:center;"><?php wpm_is_rtl() ? _e('لا توجد مسارات تعلم بعد. أضفها من لوحة التحكم.', 'edtech') : _e('No learning paths yet. Add them from the admin.', 'edtech'); ?></p>
     <?php endif; ?>
   </div>
 </section>

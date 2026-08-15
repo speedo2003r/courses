@@ -19,17 +19,17 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
 <main>
 <?php if ( $course ) : ?>
 <div style="background:var(--color-bg-dark);height:auto;display:flex;flex-wrap:wrap;align-items:center;padding-block:var(--space-sm);padding-inline:var(--space-lg);gap:var(--space-sm);color:white;">
-  <a href="<?php echo esc_url( $dashboard_url ); ?>" style="color:rgba(255,255,255,0.7);font-size:13px;text-decoration:none;">← <?php is_rtl() ? _e('لوحة الطالب', 'edtech') : _e('Dashboard', 'edtech'); ?></a>
+  <a href="<?php echo esc_url( $dashboard_url ); ?>" style="color:rgba(255,255,255,0.7);font-size:13px;text-decoration:none;">← <?php wpm_is_rtl() ? _e('لوحة الطالب', 'edtech') : _e('Dashboard', 'edtech'); ?></a>
   <span style="font-size:14px;font-weight:600;"><?php echo esc_html( $course->post_title ); ?></span>
   <?php if ( is_user_logged_in() && edtech_user_is_enrolled( $course_id ) ) : ?>
     <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-inline-start:auto;">
       <?php wp_nonce_field( 'edtech_mark_complete', 'edtech_mark_complete_nonce' ); ?>
       <input type="hidden" name="action" value="edtech_mark_complete">
       <input type="hidden" name="course_id" value="<?php echo esc_attr( $course_id ); ?>">
-      <button type="submit" class="btn btn-primary btn-sm"><?php is_rtl() ? _e('تحديد كمكتمل', 'edtech') : _e('Mark as Complete', 'edtech'); ?></button>
+      <button type="submit" class="btn btn-primary btn-sm"><?php wpm_is_rtl() ? _e('تحديد كمكتمل', 'edtech') : _e('Mark as Complete', 'edtech'); ?></button>
     </form>
   <?php else : ?>
-    <span style="margin-inline-start:auto;font-size:13px;color:rgba(255,255,255,0.5);"><?php is_rtl() ? _e('سجّل الدخول للتتبع', 'edtech') : _e('Sign in to track', 'edtech'); ?></span>
+    <span style="margin-inline-start:auto;font-size:13px;color:rgba(255,255,255,0.5);"><?php wpm_is_rtl() ? _e('سجّل الدخول للتتبع', 'edtech') : _e('Sign in to track', 'edtech'); ?></span>
   <?php endif; ?>
 </div>
 
@@ -44,14 +44,14 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
     <div style="padding:var(--space-lg);max-width:800px;">
       <h1 style="margin-bottom:var(--space-sm);"><?php echo esc_html( $course->post_title ); ?></h1>
       <?php if ( $progress > 0 ) : ?>
-        <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--space-md);"><?php printf( esc_html( is_rtl() ? 'التقدم الحالي: %d%%' : 'Current progress: %d%%' ), $progress ); ?></p>
+        <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--space-md);"><?php printf( esc_html( wpm_is_rtl() ? 'التقدم الحالي: %d%%' : 'Current progress: %d%%' ), $progress ); ?></p>
       <?php endif; ?>
       <?php
       // Render course content (syllabus/outcomes/skills from meta).
       $sections = array(
-        'syllabus' => is_rtl() ? 'المنهج' : 'Curriculum',
-        'outcomes' => is_rtl() ? 'مخرجات التعلم' : 'Learning Outcomes',
-        'skills'   => is_rtl() ? 'المهارات' : 'Skills',
+        'syllabus' => wpm_is_rtl() ? 'المنهج' : 'Curriculum',
+        'outcomes' => wpm_is_rtl() ? 'مخرجات التعلم' : 'Learning Outcomes',
+        'skills'   => wpm_is_rtl() ? 'المهارات' : 'Skills',
       );
       foreach ( $sections as $key => $label ) :
         if ( ! empty( $course_meta[ $key ] ) ) : ?>
@@ -70,7 +70,7 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
   </div>
 
   <aside style="background:var(--color-bg-dark);color:white;padding:var(--space-md);">
-    <h4 style="color:white;margin-bottom:var(--space-md);"><?php is_rtl() ? _e('منهج الدورة', 'edtech') : _e('Course Curriculum', 'edtech'); ?></h4>
+    <h4 style="color:white;margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e('منهج الدورة', 'edtech') : _e('Course Curriculum', 'edtech'); ?></h4>
     <div style="font-size:13px;display:flex;flex-direction:column;gap:8px;">
       <?php
       if ( ! empty( $course_meta['syllabus'] ) ) :
@@ -85,7 +85,7 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
           $i++;
         endforeach;
       else : ?>
-        <span style="color:rgba(255,255,255,0.5);"><?php is_rtl() ? _e('لا يوجد منهج بعد.', 'edtech') : _e('No curriculum yet.', 'edtech'); ?></span>
+        <span style="color:rgba(255,255,255,0.5);"><?php wpm_is_rtl() ? _e('لا يوجد منهج بعد.', 'edtech') : _e('No curriculum yet.', 'edtech'); ?></span>
       <?php endif; ?>
     </div>
     <?php if ( $progress < 100 ) : ?>
@@ -96,15 +96,15 @@ $dashboard_url = edtech_page_url( 'student-dashboard' );
         <span style="font-size:12px;color:rgba(255,255,255,0.6);"><?php echo esc_html( $progress ); ?>%</span>
       </div>
     <?php else : ?>
-      <p style="margin-top:var(--space-md);color:var(--color-success);font-size:13px;">✓ <?php is_rtl() ? _e('أكملت هذه الدورة!', 'edtech') : _e('You completed this course!', 'edtech'); ?></p>
+      <p style="margin-top:var(--space-md);color:var(--color-success);font-size:13px;">✓ <?php wpm_is_rtl() ? _e('أكملت هذه الدورة!', 'edtech') : _e('You completed this course!', 'edtech'); ?></p>
     <?php endif; ?>
   </aside>
 </div>
 <?php else : ?>
 <div style="padding:var(--space-2xl);text-align:center;">
-  <h1><?php is_rtl() ? _e('لم يتم اختيار دورة', 'edtech') : _e('No Course Selected', 'edtech'); ?></h1>
-  <p style="color:var(--color-text-muted);margin-bottom:var(--space-md);"><?php is_rtl() ? _e('تصفح الكتالوج لاختيار دورة.', 'edtech') : _e('Browse the catalog to choose a course.', 'edtech'); ?></p>
-  <a href="<?php echo esc_url( get_post_type_archive_link( 'course' ) ); ?>" class="btn btn-primary"><?php is_rtl() ? _e('تصفح الدورات ←', 'edtech') : _e('Browse Courses →', 'edtech'); ?></a>
+  <h1><?php wpm_is_rtl() ? _e('لم يتم اختيار دورة', 'edtech') : _e('No Course Selected', 'edtech'); ?></h1>
+  <p style="color:var(--color-text-muted);margin-bottom:var(--space-md);"><?php wpm_is_rtl() ? _e('تصفح الكتالوج لاختيار دورة.', 'edtech') : _e('Browse the catalog to choose a course.', 'edtech'); ?></p>
+  <a href="<?php echo esc_url( get_post_type_archive_link( 'course' ) ); ?>" class="btn btn-primary"><?php wpm_is_rtl() ? _e('تصفح الدورات ←', 'edtech') : _e('Browse Courses →', 'edtech'); ?></a>
 </div>
 <?php endif; ?>
 </main>

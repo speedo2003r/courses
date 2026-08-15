@@ -17,7 +17,7 @@ get_header();
 <section style="background:var(--color-bg-dark);padding-block:var(--space-xl);">
   <div class="container">
     <div class="reveal">
-      <span class="badge badge-free" style="margin-bottom:var(--space-sm);"><?php is_rtl() ? _e('مجاني 100% — لا يتطلب تسجيلاً', 'edtech') : _e('100% Free — No Credit Card Required', 'edtech'); ?></span>
+      <span class="badge badge-free" style="margin-bottom:var(--space-sm);"><?php wpm_is_rtl() ? _e('مجاني 100% — لا يتطلب تسجيلاً', 'edtech') : _e('100% Free — No Credit Card Required', 'edtech'); ?></span>
       <h1 style="color:white;font-size:var(--font-size-h1);margin-bottom:var(--space-sm);"><?php the_title(); ?></h1>
       <?php if ( has_excerpt() ) : ?>
         <p style="color:rgba(255,255,255,0.8);font-size:var(--font-size-body-lg);max-width:640px;"><?php echo esc_html( get_the_excerpt() ); ?></p>
@@ -48,7 +48,7 @@ get_header();
 
         <div class="card reveal" style="margin-bottom:var(--space-md);">
           <div class="tabs">
-            <button class="tab-trigger active" data-panel="tab-overview"><?php is_rtl() ? _e('نظرة عامة', 'edtech') : _e('Overview', 'edtech'); ?></button>
+            <button class="tab-trigger active" data-panel="tab-overview"><?php wpm_is_rtl() ? _e('نظرة عامة', 'edtech') : _e('Overview', 'edtech'); ?></button>
           </div>
           <div data-tabs-container>
             <div id="tab-overview" class="tab-panel active">
@@ -61,9 +61,9 @@ get_header();
       <!-- Resource Sidebar -->
       <aside>
         <div class="card" style="background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-secondary) 100%);border-color:transparent;">
-          <h3 style="color:white;margin-bottom:var(--space-sm);"><?php echo esc_html( edtech_get_site_setting( 'enroll_banner_title', is_rtl() ? 'واصل التعلم' : 'Continue Learning' ) ); ?></h3>
-          <p style="color:rgba(255,255,255,0.85);font-size:14px;margin-bottom:var(--space-md);"><?php echo esc_html( edtech_get_site_setting( 'enroll_banner_text', is_rtl() ? 'استكشف دوراتنا الكاملة.' : 'Explore our full courses.' ) ); ?></p>
-          <a href="<?php echo esc_url( get_post_type_archive_link( 'course' ) ); ?>" class="btn" style="width:100%;background:white;color:var(--color-primary);font-weight:700;"><?php is_rtl() ? _e('تصفح الدورات ←', 'edtech') : _e('Browse Courses →', 'edtech'); ?></a>
+          <h3 style="color:white;margin-bottom:var(--space-sm);"><?php echo esc_html( edtech_get_site_setting( 'enroll_banner_title', wpm_is_rtl() ? 'واصل التعلم' : 'Continue Learning' ) ); ?></h3>
+          <p style="color:rgba(255,255,255,0.85);font-size:14px;margin-bottom:var(--space-md);"><?php echo esc_html( edtech_get_site_setting( 'enroll_banner_text', wpm_is_rtl() ? 'استكشف دوراتنا الكاملة.' : 'Explore our full courses.' ) ); ?></p>
+          <a href="<?php echo esc_url( get_post_type_archive_link( 'course' ) ); ?>" class="btn" style="width:100%;background:white;color:var(--color-primary);font-weight:700;"><?php wpm_is_rtl() ? _e('تصفح الدورات ←', 'edtech') : _e('Browse Courses →', 'edtech'); ?></a>
         </div>
       </aside>
 

@@ -28,16 +28,16 @@ while ( have_posts() ) : the_post();
 	      <img src="<?php echo esc_url( $img ); ?>" alt="<?php the_title_attribute(); ?>" style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:4px solid var(--color-primary);">
 	      <div class="reveal">
 	        <p style="color:var(--color-text-muted);font-size:13px;margin-bottom:4px;">
-	          <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e('الرئيسية', 'edtech') : _e('Home', 'edtech'); ?></a> &rsaquo;
-	          <a href="<?php echo esc_url( get_post_type_archive_link( 'instructor' ) ); ?>" style="color:inherit;text-decoration:none;"><?php is_rtl() ? _e('المدربون', 'edtech') : _e('Instructors', 'edtech'); ?></a>
+	          <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color:inherit;text-decoration:none;"><?php wpm_is_rtl() ? _e('الرئيسية', 'edtech') : _e('Home', 'edtech'); ?></a> &rsaquo;
+	          <a href="<?php echo esc_url( get_post_type_archive_link( 'instructor' ) ); ?>" style="color:inherit;text-decoration:none;"><?php wpm_is_rtl() ? _e('المدربون', 'edtech') : _e('Instructors', 'edtech'); ?></a>
 	        </p>
 	        <h1 style="margin-bottom:var(--space-xs);"><?php the_title(); ?></h1>
 	        <?php if ( $title ) : ?><p style="color:var(--color-primary);font-weight:600;font-size:1.125rem;margin-bottom:var(--space-sm);"><?php echo esc_html( $title ); ?></p><?php endif; ?>
-	        <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--space-md);">★ <?php echo esc_html( $rating ); ?><?php if ( $students ) : ?> · <?php echo esc_html( number_format_i18n( (float) $students ) ); ?> <?php is_rtl() ? _e('طالب', 'edtech') : _e('Students', 'edtech'); ?><?php endif; ?></p>
+	        <p style="font-size:14px;color:var(--color-text-muted);margin-bottom:var(--space-md);">★ <?php echo esc_html( $rating ); ?><?php if ( $students ) : ?> · <?php echo esc_html( number_format_i18n( (float) $students ) ); ?> <?php wpm_is_rtl() ? _e('طالب', 'edtech') : _e('Students', 'edtech'); ?><?php endif; ?></p>
 	        <?php if ( $audio_src ) : ?>
 	          <button class="audio-btn" data-audio="<?php echo esc_url( $audio_src ); ?>" aria-label="<?php esc_attr_e('Play voice intro', 'edtech'); ?>">
 	            <div class="audio-bars" aria-hidden="true"><div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div></div>
-	            <span><?php is_rtl() ? _e('مقدمة صوتية', 'edtech') : _e('Voice Intro', 'edtech'); ?></span>
+	            <span><?php wpm_is_rtl() ? _e('مقدمة صوتية', 'edtech') : _e('Voice Intro', 'edtech'); ?></span>
 	          </button>
 	        <?php endif; ?>
 	      </div>
@@ -65,7 +65,7 @@ while ( have_posts() ) : the_post();
 	if ( $inst_courses ) : ?>
 	<section class="section-padding-sm" style="background:var(--color-bg-subtle);">
 	  <div class="container">
-	    <h2 style="margin-bottom:var(--space-lg);"><?php is_rtl() ? _e('دورات المدرب', 'edtech') : _e('Courses by this Instructor', 'edtech'); ?></h2>
+	    <h2 style="margin-bottom:var(--space-lg);"><?php wpm_is_rtl() ? _e('دورات المدرب', 'edtech') : _e('Courses by this Instructor', 'edtech'); ?></h2>
 	    <div class="grid grid-3">
 	      <?php foreach ( $inst_courses as $c ) : setup_postdata( $c ); ?>
 	        <?php get_template_part( 'template-parts/content-course-card' ); ?>

@@ -23,15 +23,15 @@ if ( $post_id && 'instructor' === get_post_type( $post_id ) ) {
 		$rating = '4.9';
 	}
 	$students = get_post_meta( $post_id, '_instructor_students', true );
-	$stats    = '★ ' . $rating . ' · ' . ( $students ? number_format_i18n( (float) $students ) : '—' ) . ' ' . ( is_rtl() ? 'طالب' : 'Students' );
+	$stats    = '★ ' . $rating . ' · ' . ( $students ? number_format_i18n( (float) $students ) : '—' ) . ' ' . ( wpm_is_rtl() ? 'طالب' : 'Students' );
 	$link     = get_permalink( $post_id );
 } else {
 	// Explicit args fallback.
-	$name   = ! empty( $args['name'] ) ? $args['name'] : ( is_rtl() ? 'م. طارق منصور' : 'Eng. Tariq Mansour' );
-	$title  = ! empty( $args['title'] ) ? $args['title'] : ( is_rtl() ? 'مهندس Full-Stack أول' : 'Senior Full-Stack Architect' );
+	$name   = ! empty( $args['name'] ) ? $args['name'] : ( wpm_is_rtl() ? 'م. طارق منصور' : 'Eng. Tariq Mansour' );
+	$title  = ! empty( $args['title'] ) ? $args['title'] : ( wpm_is_rtl() ? 'مهندس Full-Stack أول' : 'Senior Full-Stack Architect' );
 	$img    = ! empty( $args['img'] ) ? $args['img'] : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80';
 	$audio  = ! empty( $args['audio'] ) ? $args['audio'] : '';
-	$stats  = ! empty( $args['stats'] ) ? $args['stats'] : ( is_rtl() ? '★ 4.9 · 1,240 طالب' : '★ 4.9 · 1,240 Students' );
+	$stats  = ! empty( $args['stats'] ) ? $args['stats'] : ( wpm_is_rtl() ? '★ 4.9 · 1,240 طالب' : '★ 4.9 · 1,240 Students' );
 	$link   = '';
 }
 
@@ -62,7 +62,7 @@ if ( $audio ) {
       <div class="audio-bar"></div><div class="audio-bar"></div>
       <div class="audio-bar"></div>
     </div>
-    <span><?php is_rtl() ? _e('مقدمة صوتية', 'edtech') : _e('Voice Intro', 'edtech'); ?></span>
+    <span><?php wpm_is_rtl() ? _e('مقدمة صوتية', 'edtech') : _e('Voice Intro', 'edtech'); ?></span>
   </button>
   <?php endif; ?>
 </div>
