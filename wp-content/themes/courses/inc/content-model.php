@@ -178,11 +178,41 @@ function edtech_get_dashboard_url() {
 function edtech_get_enrolled_course_ids( $user_id = 0 ) {
 	$user_id = $user_id ?: get_current_user_id();
 	$ids     = get_user_meta( $user_id, '_edtech_enrolled_courses', true );
-	return array_values( array_filter( array_map( 'absint', is_array( $ids ) ? $ids : array() ) ) );
+	$ids     = array_values( array_filter( array_map( 'absint', is_array( $ids ) ? $ids : array() ) ) );
+
+	$current_lang = function_exists( 'wpm_get_current_language' ) ? wpm_get_current_language() : null;
+	if ( $current_lang && function_exists( 'wpm_get_translation' ) ) {
+		$translated_ids = array();
+		foreach ( $ids as $cid ) {
+			$trans = wpm_get_translation( $cid, $current_lang, 'post' );
+			$translated_ids[] = $trans ? (int) $trans : $cid;
+		}
+		return array_values( array_unique( $translated_ids ) );
+	}
+
+	return $ids;
 }
 
 function edtech_user_is_enrolled( $course_id, $user_id = 0 ) {
-	return in_array( absint( $course_id ), edtech_get_enrolled_course_ids( $user_id ), true );
+	$user_id = $user_id ?: get_current_user_id();
+	$raw_ids = get_user_meta( $user_id, '_edtech_enrolled_courses', true );
+	$raw_ids = array_values( array_filter( array_map( 'absint', is_array( $raw_ids ) ? $raw_ids : array() ) ) );
+	$target  = absint( $course_id );
+
+	if ( in_array( $target, $raw_ids, true ) ) {
+		return true;
+	}
+
+	if ( function_exists( 'wpm_get_translations' ) ) {
+		$translations = wpm_get_translations( $target, 'post' );
+		foreach ( $translations as $tid ) {
+			if ( in_array( (int) $tid, $raw_ids, true ) ) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 function edtech_get_course_meta( $post_id ) {
