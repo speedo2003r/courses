@@ -53,11 +53,6 @@ class QueryFilter {
 	 * @param \WP_Query $query
 	 */
 	public function filter_pre_get_posts( $query ) {
-		// Do not filter if suppressed or explicitly bypassed
-		if ( $query->get( 'suppress_filters' ) ) {
-			return;
-		}
-
 		// Check explicit 'lang' query parameter on WP_Query
 		$query_lang = $query->get( 'lang' );
 
