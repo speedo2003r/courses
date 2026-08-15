@@ -140,6 +140,18 @@ function wpm_has_translation( $object_id, $lang_code, $object_type = 'post' ) {
  * @return string
  */
 function wpm_get_translated_url( $post_id, $lang_code ) {
+	if ( 'page' === get_option( 'show_on_front' ) ) {
+		$raw_front_id = (int) get_option( 'page_on_front' );
+		if ( $raw_front_id ) {
+			$trans_mgr   = TranslationManager::get_instance();
+			$front_group = $trans_mgr->get_object_group_id( $raw_front_id, 'post' );
+			$this_group  = $trans_mgr->get_object_group_id( (int) $post_id, 'post' );
+			if ( (int) $post_id === $raw_front_id || ( $front_group && $front_group === $this_group ) ) {
+				return wpm_get_home_url( $lang_code );
+			}
+		}
+	}
+
 	$translated_id = wpm_get_translation( $post_id, $lang_code, 'post' );
 	if ( $translated_id ) {
 		return get_permalink( $translated_id );

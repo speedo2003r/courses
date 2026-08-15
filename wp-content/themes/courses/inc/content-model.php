@@ -80,8 +80,29 @@ function edtech_get_bilingual_meta( $post_id, $key ) {
 }
 
 function edtech_page_url( $slug ) {
-	$page = get_page_by_path( sanitize_title( $slug ) );
-	return $page ? get_permalink( $page ) : home_url( '/' . trim( $slug, '/' ) . '/' );
+	$current_lang = function_exists( 'wpm_get_current_language' ) ? wpm_get_current_language() : 'en';
+	$clean_slug   = sanitize_title( $slug );
+
+	$page = get_page_by_path( $clean_slug );
+	if ( $page ) {
+		if ( function_exists( 'wpm_get_translation' ) ) {
+			$trans_id = wpm_get_translation( $page->ID, $current_lang, 'post' );
+			if ( $trans_id ) {
+				return get_permalink( $trans_id );
+			}
+		}
+		return get_permalink( $page );
+	}
+
+	if ( 'ar' === $current_lang ) {
+		$ar_page = get_page_by_path( $clean_slug . '-ar' );
+		if ( $ar_page ) {
+			return get_permalink( $ar_page );
+		}
+	}
+
+	$home = function_exists( 'wpm_get_home_url' ) ? wpm_get_home_url( $current_lang ) : home_url( '/' );
+	return trailingslashit( $home ) . trim( $slug, '/' ) . '/';
 }
 
 function edtech_safe_return_url( $candidate, $fallback = '' ) {

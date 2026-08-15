@@ -51,8 +51,16 @@ class Rewrite {
 		add_filter( 'post_link', [ $this, 'filter_post_link' ], 10, 2 );
 		add_filter( 'page_link', [ $this, 'filter_page_link' ], 10, 2 );
 		add_filter( 'post_type_link', [ $this, 'filter_post_type_link' ], 10, 2 );
+		add_filter( 'post_type_archive_link', [ $this, 'filter_post_type_archive_link' ], 10, 2 );
 		add_filter( 'term_link', [ $this, 'filter_term_link' ], 10, 3 );
 		add_filter( 'home_url', [ $this, 'filter_home_url' ], 10, 4 );
+		add_filter( 'wp_nav_menu_objects', [ $this, 'filter_nav_menu_objects' ], 10, 2 );
+
+		// Front page & Posts page translation filters
+		add_filter( 'option_page_on_front', [ $this, 'filter_page_on_front' ] );
+		add_filter( 'option_page_for_posts', [ $this, 'filter_page_for_posts' ] );
+		add_filter( 'request', [ $this, 'filter_request' ] );
+		add_action( 'template_redirect', [ $this, 'redirect_front_page_slug' ] );
 	}
 
 	/**
@@ -239,6 +247,20 @@ class Rewrite {
 			$lang = wpm_get_current_language();
 		}
 
+		// If this page is the static front page or a translation of it, return clean home URL
+		if ( 'page' === get_option( 'show_on_front' ) ) {
+			$raw_front_id = (int) get_option( 'page_on_front' );
+			if ( $raw_front_id ) {
+				$trans_mgr   = TranslationManager::get_instance();
+				$front_group = $trans_mgr->get_object_group_id( $raw_front_id, 'post' );
+				$this_group  = $trans_mgr->get_object_group_id( (int) $post_id, 'post' );
+				if ( (int) $post_id === $raw_front_id || ( $front_group && $front_group === $this_group ) ) {
+					$url = $this->get_home_url( $lang );
+					return apply_filters( 'wpm_page_link', $url, $post_id, $lang );
+				}
+			}
+		}
+
 		$url = $this->add_language_to_url( $permalink, $lang );
 		return apply_filters( 'wpm_page_link', $url, $post_id, $lang );
 	}
@@ -355,5 +377,159 @@ class Rewrite {
 		$clean  = ltrim( $path, '/' );
 
 		return trailingslashit( $home ) . $prefix . $clean;
+	}
+
+	/**
+	 * Filter page_on_front option by current language on frontend.
+	 *
+	 * @param mixed $page_id
+	 * @return mixed
+	 */
+	public function filter_page_on_front( $page_id ) {
+		if ( empty( $page_id ) || ( is_admin() && ! wp_doing_ajax() ) ) {
+			return $page_id;
+		}
+
+		$current_lang = wpm_get_current_language();
+		if ( ! $current_lang ) {
+			return $page_id;
+		}
+
+		$trans_id = wpm_get_translation( (int) $page_id, $current_lang, 'post' );
+		return $trans_id ?: $page_id;
+	}
+
+	/**
+	 * Filter page_for_posts option by current language on frontend.
+	 *
+	 * @param mixed $page_id
+	 * @return mixed
+	 */
+	public function filter_page_for_posts( $page_id ) {
+		if ( empty( $page_id ) || ( is_admin() && ! wp_doing_ajax() ) ) {
+			return $page_id;
+		}
+
+		$current_lang = wpm_get_current_language();
+		if ( ! $current_lang ) {
+			return $page_id;
+		}
+
+		$trans_id = wpm_get_translation( (int) $page_id, $current_lang, 'post' );
+		return $trans_id ?: $page_id;
+	}
+
+	/**
+	 * Filter request query variables for language home roots.
+	 *
+	 * @param array $query_vars
+	 * @return array
+	 */
+	public function filter_request( $query_vars ) {
+		if ( isset( $query_vars['lang'] ) && 1 === count( $query_vars ) ) {
+			if ( 'page' === get_option( 'show_on_front' ) ) {
+				$lang_mgr    = LanguageManager::get_instance();
+				$lang_obj    = $lang_mgr->get_language_by_url_code( $query_vars['lang'] ) ?: $lang_mgr->get_language( $query_vars['lang'] );
+				$target_lang = $lang_obj ? $lang_obj->code : $query_vars['lang'];
+				$lang_mgr->set_current_language( $target_lang );
+
+				$front_page_id = (int) get_option( 'page_on_front' );
+				if ( $front_page_id ) {
+					$query_vars['page_id'] = $front_page_id;
+				}
+			}
+		}
+		return $query_vars;
+	}
+
+	/**
+	 * Redirect any direct visit to the front page slug to the clean home URL.
+	 */
+	public function redirect_front_page_slug() {
+		if ( is_admin() || ! is_page() ) {
+			return;
+		}
+
+		if ( 'page' === get_option( 'show_on_front' ) ) {
+			$raw_front_id = (int) get_option( 'page_on_front' );
+			$current_id   = (int) get_queried_object_id();
+			if ( $raw_front_id && $current_id ) {
+				$trans_mgr   = TranslationManager::get_instance();
+				$front_group = $trans_mgr->get_object_group_id( $raw_front_id, 'post' );
+				$this_group  = $trans_mgr->get_object_group_id( $current_id, 'post' );
+
+				if ( $current_id === $raw_front_id || ( $front_group && $front_group === $this_group ) ) {
+					$req_uri    = trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+					$lang       = wpm_get_post_language( $current_id ) ?: wpm_get_current_language();
+					$target_url = $this->get_home_url( $lang );
+					$target_uri = trim( (string) wp_parse_url( $target_url, PHP_URL_PATH ), '/' );
+
+					if ( $req_uri !== $target_uri ) {
+						wp_safe_redirect( $target_url, 301 );
+						exit;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Filter post type archive link to include language prefix.
+	 *
+	 * @param string $link
+	 * @param string $post_type
+	 * @return string
+	 */
+	public function filter_post_type_archive_link( $link, $post_type ) {
+		if ( class_exists( __NAMESPACE__ . '\\PostIntegration' ) && ! PostIntegration::get_instance()->is_translatable_post_type( $post_type ) ) {
+			return $link;
+		}
+
+		$lang = wpm_get_current_language();
+		return $this->add_language_to_url( $link, $lang );
+	}
+
+	/**
+	 * Filter WordPress navigation menu items to switch to current language translation.
+	 *
+	 * @param array $sorted_menu_items
+	 * @param array $args
+	 * @return array
+	 */
+	public function filter_nav_menu_objects( $sorted_menu_items, $args ) {
+		$current_lang = wpm_get_current_language();
+		if ( empty( $current_lang ) || empty( $sorted_menu_items ) ) {
+			return $sorted_menu_items;
+		}
+
+		$trans_mgr = TranslationManager::get_instance();
+
+		foreach ( $sorted_menu_items as $item ) {
+			if ( 'post_type' === $item->type && ! empty( $item->object_id ) ) {
+				$trans_id = $trans_mgr->get_translation( (int) $item->object_id, $current_lang, 'post' );
+				if ( $trans_id && (int) $trans_id !== (int) $item->object_id ) {
+					$trans_post = get_post( $trans_id );
+					if ( $trans_post ) {
+						$item->object_id = $trans_id;
+						$item->url       = get_permalink( $trans_id );
+						if ( empty( $item->post_title ) || $item->title === get_the_title( (int) $item->object_id ) ) {
+							$item->title = $trans_post->post_title;
+						}
+					}
+				}
+			} elseif ( 'taxonomy' === $item->type && ! empty( $item->object_id ) ) {
+				$trans_id = $trans_mgr->get_translation( (int) $item->object_id, $current_lang, 'term' );
+				if ( $trans_id && (int) $trans_id !== (int) $item->object_id ) {
+					$trans_term = get_term( $trans_id, $item->object );
+					if ( $trans_term && ! is_wp_error( $trans_term ) ) {
+						$item->object_id = $trans_id;
+						$item->url       = get_term_link( $trans_term, $item->object );
+						$item->title     = $trans_term->name;
+					}
+				}
+			}
+		}
+
+		return $sorted_menu_items;
 	}
 }

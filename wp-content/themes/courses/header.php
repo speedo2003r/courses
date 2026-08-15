@@ -88,14 +88,19 @@
     <div class="nav-actions">
       <?php
       $current_lang = wpm_get_current_language();
-      $current_post_id = is_singular() ? get_the_ID() : 0;
+      if ( is_front_page() || ( is_home() && 'page' !== get_option( 'show_on_front' ) ) ) {
+        $en_url = wpm_get_home_url( 'en' );
+        $ar_url = wpm_get_home_url( 'ar' );
+      } else {
+        $current_post_id = is_singular() ? get_the_ID() : ( is_home() ? (int) get_option( 'page_for_posts' ) : 0 );
+        $en_url = $current_post_id ? wpm_get_translated_url( $current_post_id, 'en' ) : wpm_get_home_url( 'en' );
+        $ar_url = $current_post_id ? wpm_get_translated_url( $current_post_id, 'ar' ) : wpm_get_home_url( 'ar' );
+      }
 
       if ( 'ar' === $current_lang ) :
-        $en_url = $current_post_id ? wpm_get_translated_url( $current_post_id, 'en' ) : wpm_get_home_url( 'en' );
         ?>
         <a href="<?php echo esc_url( $en_url ); ?>" class="btn btn-ghost lang-switcher-btn" data-lang="en">English</a>
       <?php else :
-        $ar_url = $current_post_id ? wpm_get_translated_url( $current_post_id, 'ar' ) : wpm_get_home_url( 'ar' );
         ?>
         <a href="<?php echo esc_url( $ar_url ); ?>" class="btn btn-ghost lang-switcher-btn" data-lang="ar">العربية</a>
       <?php endif; ?>

@@ -234,18 +234,55 @@ class TaxonomyIntegration {
 	 * @return array
 	 */
 	public function filter_get_terms_args( $args, $taxonomies ) {
-		// Only filter if lang arg explicitly provided
-		if ( isset( $args['lang'] ) && is_string( $args['lang'] ) ) {
-			$lang = $args['lang'];
-			if ( 'all' !== $lang ) {
-				$args['meta_query']   = $args['meta_query'] ?? [];
-				$args['meta_query'][] = [
-					'key'     => TranslationManager::META_LANG,
-					'value'   => sanitize_text_field( $lang ),
-					'compare' => '=',
-				];
-			}
+		if ( ! empty( $args['suppress_filters'] ) ) {
+			return $args;
 		}
+
+		$lang = isset( $args['lang'] ) ? $args['lang'] : null;
+		if ( 'all' === $lang || false === $lang ) {
+			return $args;
+		}
+
+		if ( is_admin() && empty( $lang ) ) {
+			return $args;
+		}
+
+		if ( empty( $lang ) ) {
+			$lang = wpm_get_current_language();
+		}
+
+		if ( empty( $lang ) ) {
+			return $args;
+		}
+
+		$trans_taxonomies = $this->get_translatable_taxonomies();
+		$has_translatable = false;
+
+		$check_taxonomies = ! empty( $taxonomies ) ? (array) $taxonomies : ( ! empty( $args['taxonomy'] ) ? (array) $args['taxonomy'] : [] );
+		if ( ! empty( $check_taxonomies ) ) {
+			foreach ( $check_taxonomies as $tax ) {
+				if ( in_array( $tax, $trans_taxonomies, true ) ) {
+					$has_translatable = true;
+					break;
+				}
+			}
+		} else {
+			$has_translatable = true;
+		}
+
+		if ( ! $has_translatable ) {
+			return $args;
+		}
+
+		if ( empty( $args['meta_query'] ) || ! is_array( $args['meta_query'] ) ) {
+			$args['meta_query'] = [];
+		}
+
+		$args['meta_query'][] = [
+			'key'     => TranslationManager::META_LANG,
+			'value'   => sanitize_text_field( $lang ),
+			'compare' => '=',
+		];
 
 		return $args;
 	}
