@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "semble-lite": {
+      "command": "python3",
+      "args": [
+        "/home/speedo2003r/.local/share/semble-lite/server.py"
+      ]
+    }
+  }
+}
